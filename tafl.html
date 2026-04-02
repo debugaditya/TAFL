@@ -1,0 +1,1955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GrammarForge — CFG to CNF & GNF</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<style>
+:root {
+  --bg: #09090f;
+  --bg2: #0f0f1a;
+  --bg3: #141422;
+  --surface: #1a1a2e;
+  --surface2: #1f1f35;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --text: #f0f0ff;
+  --text2: #9898b8;
+  --text3: #55556a;
+  --accent: #7c5cfc;
+  --accent2: #fc5c8a;
+  --accent3: #5cfce8;
+  --accent4: #fcc95c;
+  --accent5: #5ca8fc;
+  --grad1: linear-gradient(135deg, #7c5cfc, #fc5c8a);
+  --grad2: linear-gradient(135deg, #5cfce8, #5ca8fc);
+  --grad3: linear-gradient(135deg, #fcc95c, #fc5c8a);
+  --nav-h: 64px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+.cursor {
+  width: 12px; height: 12px;
+  background: var(--accent);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 99999;
+  transition: transform 0.15s ease, background 0.2s ease;
+  transform: translate(-50%,-50%);
+  mix-blend-mode: difference;
+}
+.cursor-trail {
+  width: 32px; height: 32px;
+  border: 1.5px solid rgba(124,92,252,0.4);
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 99998;
+  transform: translate(-50%,-50%);
+  transition: all 0.12s ease;
+}
+body:has(button:hover) .cursor,
+body:has(a:hover) .cursor { transform: translate(-50%,-50%) scale(2.5); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 2px; }
+
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 1000; opacity: 0.5;
+}
+
+.sticky-nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: var(--nav-h);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1);
+  background: transparent;
+}
+.sticky-nav.scrolled {
+  background: rgba(9,9,15,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border2);
+  box-shadow: 0 4px 40px rgba(0,0,0,0.4);
+}
+.nav-brand { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.nav-logo {
+  width: 34px; height: 34px; border-radius: 10px; background: var(--grad1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 800; color: white;
+  font-family: 'JetBrains Mono', monospace; box-shadow: 0 0 20px rgba(124,92,252,0.4);
+}
+.nav-brand-name { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--text); letter-spacing: -0.5px; }
+.nav-brand-name em { color: var(--accent); font-style: italic; }
+
+.nav-links { display: flex; align-items: center; gap: 4px; }
+.nav-link {
+  padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--text3);
+  border: none; background: none; cursor: pointer; border-radius: 10px;
+  transition: all 0.2s; display: flex; align-items: center; gap: 6px;
+  font-family: 'Outfit', sans-serif; letter-spacing: 0.2px; position: relative;
+}
+.nav-link::after {
+  content: ''; position: absolute; bottom: 4px; left: 50%; right: 50%;
+  height: 1.5px; background: var(--accent3); border-radius: 2px;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.nav-link:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+.nav-link:hover::after { left: 16px; right: 16px; }
+.nav-link.active { color: var(--text); background: rgba(124,92,252,0.08); }
+.nav-link.active::after { left: 16px; right: 16px; background: var(--accent); }
+
+.nav-link-icon { font-size: 14px; }
+
+.nav-cta {
+  padding: 9px 20px; background: var(--grad1); border: none; border-radius: 12px;
+  color: white; font-family: 'Outfit', sans-serif; font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 20px rgba(124,92,252,0.3); margin-left: 8px;
+}
+.nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(124,92,252,0.5); }
+
+.scroll-progress {
+  position: fixed; top: var(--nav-h); left: 0; height: 2px;
+  background: var(--grad1); z-index: 8999; transition: width 0.1s linear;
+  box-shadow: 0 0 10px rgba(124,92,252,0.5);
+}
+
+@media(max-width:768px) {
+  .nav-links { display: none; }
+  .nav-cta { display: none; }
+  .sticky-nav { padding: 0 20px; }
+}
+
+/* Offset for ID links */
+section { scroll-margin-top: var(--nav-h); }
+.step-card, .graph-card, .final-card {
+  scroll-margin-top: calc(var(--nav-h) + 24px);
+}
+
+section { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+/* Nav Arrows Styles */
+.section-nav-arrows {
+  display: flex; gap: 6px; align-items: center;
+}
+.nav-arrow-btn {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  color: var(--text3); display: flex; align-items: center; justify-content: center;
+  cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+}
+.nav-arrow-btn:hover:not(:disabled) {
+  background: rgba(124,92,252,0.1); color: var(--accent); border-color: var(--accent); transform: translateY(-2px);
+}
+.nav-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.arrow-absolute { position: absolute; top: 0; right: 0; z-index: 10; }
+
+/* HERO */
+.hero {
+  background: var(--bg); overflow: hidden;
+  padding: 140px 24px 80px; text-align: center; min-height: 100vh;
+}
+.hero-bg {
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 50% at 20% 40%, rgba(124,92,252,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 40% at 80% 60%, rgba(252,92,138,0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 60% at 50% 80%, rgba(92,252,232,0.06) 0%, transparent 60%);
+  animation: meshShift 18s ease-in-out infinite;
+}
+@keyframes meshShift {
+  0%,100% { transform: scale(1) translate(0,0); }
+  33% { transform: scale(1.05) translate(-2%,1%); }
+  66% { transform: scale(0.98) translate(1%,-1%); }
+}
+.particles { position: absolute; inset: 0; overflow: hidden; }
+.particle {
+  position: absolute; width: 2px; height: 2px;
+  background: var(--accent); border-radius: 50%;
+  animation: float linear infinite; opacity: 0;
+}
+@keyframes float {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.6; }
+  90% { opacity: 0.3; }
+  100% { transform: translateY(-20px) scale(1); opacity: 0; }
+}
+.hero-grid {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(124,92,252,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(124,92,252,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  animation: gridFade 4s ease-in-out infinite alternate;
+}
+@keyframes gridFade { from { opacity: 0.5; } to { opacity: 1; } }
+.hero-content { position: relative; z-index: 2; max-width: 900px; }
+.hero-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent3); margin-bottom: 32px; padding: 6px 16px; border: 1px solid rgba(92,252,232,0.2);
+  border-radius: 30px; background: rgba(92,252,232,0.05); animation: tagPulse 3s ease infinite;
+}
+@keyframes tagPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(92,252,232,0.2); } 50% { box-shadow: 0 0 0 8px rgba(92,252,232,0); } }
+.tag-dot { width: 6px; height: 6px; background: var(--accent3); border-radius: 50%; animation: blink 1.5s ease infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.hero h1 {
+  font-family: 'Instrument Serif', serif; font-size: clamp(48px, 8vw, 96px); line-height: 1.0;
+  letter-spacing: -3px; margin-bottom: 24px; animation: heroReveal 1s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes heroReveal { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+.hero h1 .word-cfg { color: var(--text2); }
+.hero h1 .word-to { color: var(--text3); font-style: italic; font-size: 0.7em; }
+.hero h1 .word-cnf { background: var(--grad1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero h1 .amp { color: var(--text3); font-style: italic; }
+.hero h1 .word-gnf { background: var(--grad2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.hero-desc {
+  font-size: 18px; font-weight: 400; color: var(--text2); max-width: 560px;
+  margin: 0 auto 16px; line-height: 1.7; animation: fadeUp 1s 0.2s cubic-bezier(0.4,0,0.2,1) both;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+.hero-sub {
+  font-size: 14px; color: var(--text3); margin-bottom: 56px;
+  animation: fadeUp 1s 0.35s cubic-bezier(0.4,0,0.2,1) both; font-family: 'JetBrains Mono', monospace;
+}
+.hero-chips {
+  display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 60px;
+  animation: fadeUp 1s 0.45s cubic-bezier(0.4,0,0.2,1) both;
+}
+.chip {
+  padding: 7px 16px; background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 30px; font-size: 13px; color: var(--text2);
+  font-weight: 500; transition: all 0.3s;
+}
+.chip:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.08); transform: translateY(-2px); }
+.chip span { color: var(--accent3); margin-right: 5px; }
+.scroll-cta {
+  display: flex; flex-direction: column; align-items: center; gap: 12px; cursor: pointer;
+  animation: fadeUp 1s 0.6s cubic-bezier(0.4,0,0.2,1) both; transition: transform 0.3s;
+}
+.scroll-cta:hover { transform: translateY(4px); }
+.scroll-cta-text { font-family: 'JetBrains Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.scroll-arrow-container {
+  width: 52px; height: 52px; border: 2px solid rgba(255,255,255,0.1); border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; position: relative;
+  animation: arrowBounce 2s ease-in-out infinite;
+}
+@keyframes arrowBounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+.scroll-arrow-container::before {
+  content: ''; position: absolute; inset: -6px; border: 1px solid rgba(124,92,252,0.2);
+  border-radius: 50%; animation: ripple 2s ease-in-out infinite;
+}
+@keyframes ripple { 0% { transform: scale(1); opacity: 0.5; } 100% { transform: scale(1.5); opacity: 0; } }
+
+/* ABOUT */
+.about {
+  background: var(--bg2); padding: 80px 24px; min-height: 100vh; width: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.about-inner { max-width: 1100px; width: 100%; margin: 0 auto; position: relative; }
+.section-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.section-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); display: flex; align-items: center; gap: 12px; margin-bottom: 8px;
+}
+.section-label::after { content:''; flex:1; height:1px; background: linear-gradient(90deg, var(--accent), transparent); opacity:0.3; }
+.about h2 { font-family: 'Instrument Serif', serif; font-size: clamp(28px, 4vw, 42px); letter-spacing: -1.5px; margin-bottom: 8px; line-height: 1.1; }
+.about h2 em { font-style: italic; color: var(--accent2); }
+.about-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; margin-top: 20px; }
+.about-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px;
+  transition: all 0.4s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;
+}
+.about-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--g, var(--grad1)); transform: scaleX(0); transform-origin: left; transition: transform 0.4s ease;
+}
+.about-card:hover { border-color: var(--border2); transform: translateY(-4px); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+.about-card:hover::before { transform: scaleX(1); }
+.card-icon { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 16px; margin-bottom: 12px; }
+.card-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+.card-desc { font-size: 13px; color: var(--text2); line-height: 1.5; }
+.card-badge {
+  margin-top: 10px; display: inline-block; font-family: 'JetBrains Mono', monospace; font-size: 9px;
+  padding: 3px 10px; border-radius: 20px; background: rgba(124,92,252,0.1); color: var(--accent);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+
+/* CHEATSHEET */
+.cheatsheet {
+  background: var(--bg); padding: 80px 24px; min-height: 100vh; width: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.cheatsheet-inner { max-width: 1100px; width: 100%; margin: 0 auto; position: relative; }
+.cheatsheet h2 { font-family: 'Instrument Serif', serif; font-size: clamp(24px, 3vw, 36px); letter-spacing: -1px; margin-bottom: 8px; }
+.algo-steps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px; }
+@media(max-width:800px){ .algo-steps-grid { grid-template-columns: 1fr; } }
+.algo-block { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; }
+.algo-block-header { padding: 12px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.algo-block-icon { font-size: 18px; }
+.algo-block-title { font-size: 14px; font-weight: 700; }
+.algo-block-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 2px; }
+.algo-step-row { display: flex; align-items: flex-start; gap: 12px; padding: 10px 18px; border-bottom: 1px solid var(--border); transition: background 0.2s; }
+.algo-step-row:last-child { border-bottom: none; }
+.algo-step-row:hover { background: rgba(255,255,255,0.02); }
+.algo-step-num {
+  width: 22px; height: 22px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; color: white; flex-shrink: 0; margin-top: 2px;
+}
+.algo-step-body { flex: 1; }
+.algo-step-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+.algo-step-desc { font-size: 12px; color: var(--text2); line-height: 1.4; }
+.algo-step-code {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent3); background: rgba(92,252,232,0.05);
+  border: 1px solid rgba(92,252,232,0.1); border-radius: 4px; padding: 3px 8px; margin-top: 6px; display: inline-block;
+}
+.algo-note { padding: 12px 18px; background: rgba(92,252,232,0.04); border-top: 1px solid var(--border); }
+.algo-note-title { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent3); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 1px; }
+.algo-note-desc { font-size: 12px; color: var(--text2); line-height: 1.5; }
+
+/* CALCULATOR */
+.calculator {
+  background: var(--bg3); padding: 80px 24px; min-height: 100vh; width: 100%;
+  display: flex; flex-direction: column; justify-content: center;
+}
+.calc-inner { max-width: 900px; width: 100%; margin: 0 auto; position: relative; }
+.calc-header { text-align: center; margin-bottom: 32px; }
+.calc-header h2 { font-family: 'Instrument Serif', serif; font-size: clamp(30px, 4vw, 48px); letter-spacing: -1px; margin-bottom: 8px; }
+.calc-header p { color: var(--text2); font-size: 15px; }
+.mode-bar {
+  display: flex; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 16px; padding: 5px; gap: 4px; margin-bottom: 24px; width: max-content; margin-left: auto; margin-right: auto;
+}
+.mode-btn {
+  padding: 10px 28px; border: none; border-radius: 12px; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700;
+  cursor: pointer; transition: all 0.3s cubic-bezier(0.4,0,0.2,1); color: var(--text3); background: transparent;
+}
+.mode-btn.active { color: white; box-shadow: 0 4px 20px rgba(0,0,0,0.3); }
+.mode-btn.active-cnf { background: linear-gradient(135deg, #7c5cfc, #9c7cfc); }
+.mode-btn.active-gnf { background: linear-gradient(135deg, #5cfce8, #5ca8fc); color: #0a0a1a; }
+.mode-btn.active-both { background: linear-gradient(135deg, #fcc95c, #fc5c8a); }
+.input-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.3); margin-bottom: 20px; transition: box-shadow 0.4s ease;
+}
+.input-card:focus-within { box-shadow: 0 8px 48px rgba(0,0,0,0.3), 0 0 0 1px rgba(124,92,252,0.3), 0 0 40px rgba(124,92,252,0.08); }
+.input-top { padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+.input-title { font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent3); animation: blink 1.5s ease infinite; box-shadow: 0 0 8px var(--accent3); }
+.examples-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.ex-btn {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 12px; border: 1px solid var(--border2);
+  border-radius: 20px; cursor: pointer; background: transparent; color: var(--text3); transition: all 0.2s;
+}
+.ex-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.08); }
+.grammar-ta {
+  width: 100%; min-height: 180px; background: transparent; border: none; padding: 24px; outline: none;
+  font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 2.2; color: var(--text); resize: vertical; caret-color: var(--accent3);
+}
+.grammar-ta::placeholder { color: var(--text3); line-height: 2; }
+.input-bottom { padding: 14px 24px; border-top: 1px solid var(--border); display: flex; gap: 20px; flex-wrap: wrap; align-items: center; justify-content: space-between; }
+.hints-row { display: flex; gap: 20px; flex-wrap: wrap; }
+.hint { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 5px; }
+.hint-k { color: var(--accent3); }
+.validate-btn {
+  padding: 6px 16px; border: 1px solid rgba(92,252,232,0.25); border-radius: 8px; background: rgba(92,252,232,0.06);
+  color: var(--accent3); font-family: 'JetBrains Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.2s;
+}
+.validate-btn:hover { background: rgba(92,252,232,0.12); border-color: var(--accent3); }
+.convert-wrap { position: relative; margin-bottom: 24px; }
+.convert-btn {
+  width: 100%; padding: 18px; border: none; border-radius: 16px; background: var(--grad1);
+  color: white; font-family: 'Outfit', sans-serif; font-size: 17px; font-weight: 800;
+  cursor: pointer; letter-spacing: 0.3px; display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1); position: relative; overflow: hidden;
+}
+.convert-btn::before { content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent); opacity: 0; transition: opacity 0.3s; }
+.convert-btn:hover { transform: translateY(-3px); box-shadow: 0 16px 48px rgba(124,92,252,0.4); }
+.convert-btn:hover::before { opacity: 1; }
+.convert-btn:active { transform: translateY(0); }
+.convert-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+.btn-spark { font-size: 20px; animation: spinSlow 3s linear infinite; }
+@keyframes spinSlow { to { transform: rotate(360deg); } }
+.loading-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 12px; display: none; }
+.loading-bar.visible { display: block; }
+.loading-fill { height: 100%; border-radius: 2px; background: var(--grad1); animation: loading 1.5s ease infinite; width: 30%; }
+@keyframes loading { 0% { margin-left: -30%; width: 30%; } 50% { width: 50%; } 100% { margin-left: 130%; width: 30%; } }
+.error-box {
+  background: rgba(252,92,138,0.08); border: 1px solid rgba(252,92,138,0.25); border-radius: 12px; padding: 14px 18px;
+  color: var(--accent2); font-family: 'JetBrains Mono', monospace; font-size: 13px; display: none; gap: 10px; align-items: flex-start;
+  margin-bottom: 20px; line-height: 1.6;
+}
+.error-box.visible { display: flex; }
+.valid-box {
+  background: rgba(92,252,232,0.06); border: 1px solid rgba(92,252,232,0.2); border-radius: 12px; padding: 10px 16px;
+  color: var(--accent3); font-family: 'JetBrains Mono', monospace; font-size: 12px; display: none; gap: 8px; align-items: center;
+  margin-bottom: 16px;
+}
+.valid-box.visible { display: flex; }
+
+/* RESULTS */
+.results-section { padding: 60px 24px 100px; background: var(--bg); min-height: auto; width: 100%; }
+.results-inner { max-width: 1300px; width: 100%; margin: 0 auto; position: relative; }
+.results-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
+.results-h { font-family: 'Instrument Serif', serif; font-size: 36px; letter-spacing: -1px; }
+.results-badge {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 6px 16px; border-radius: 30px;
+  background: rgba(92,252,232,0.1); color: var(--accent3); border: 1px solid rgba(92,252,232,0.2); letter-spacing: 1px;
+}
+.results-layout { display: grid; grid-template-columns: 280px 1fr; gap: 24px; align-items: start; }
+@media(max-width:1000px) { .results-layout { grid-template-columns: 1fr; } }
+.steps-nav {
+  position: sticky; top: calc(var(--nav-h) + 16px); background: var(--surface); border: 1px solid var(--border);
+  border-radius: 20px; overflow: hidden;
+}
+.nav-header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border); font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--text3);
+}
+.nav-item { padding: 13px 20px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: all 0.2s; border-bottom: 1px solid var(--border); }
+.nav-item:hover { background: rgba(255,255,255,0.03); }
+.nav-item.active { background: rgba(124,92,252,0.08); }
+.nav-num {
+  width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700; flex-shrink: 0; color: white;
+}
+.nav-info { flex: 1; min-width: 0; }
+.nav-name { font-size: 12px; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-sub { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); margin-top: 2px; }
+.nav-status { font-size: 12px; flex-shrink: 0; }
+
+.graph-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; position: relative; }
+.graph-header { padding: 18px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
+.graph-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.g-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; padding: 3px 9px; border-radius: 4px; background: rgba(124,92,252,0.12); color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+.graph-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.g-btn {
+  width: 32px; height: 32px; border: 1px solid var(--border2); border-radius: 8px; background: var(--bg3); color: var(--text2);
+  font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;
+}
+.g-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.08); }
+.g-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.g-btn.play-btn { width: auto; padding: 0 16px; gap: 6px; font-family: 'Outfit', sans-serif; font-size: 12px; font-weight: 700; }
+.g-step-lbl { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); min-width: 140px; text-align: center; }
+.graph-slider-row { padding: 6px 24px; display: flex; align-items: center; gap: 12px; }
+.g-slider-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); }
+.g-slider { flex: 1; -webkit-appearance: none; height: 3px; border-radius: 2px; background: var(--border2); outline: none; cursor: pointer; }
+.g-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--accent); cursor: pointer; box-shadow: 0 0 10px rgba(124,92,252,0.5); }
+#graphContainer { width: 100%; height: 420px; position: relative; overflow: hidden; background: #07070f; }
+.graph-canvas-overlay { position: absolute; inset: 0; background: radial-gradient(ellipse at center, transparent 40%, rgba(7,7,15,0.5) 100%); pointer-events: none; z-index: 1; }
+.anim-annotation {
+  position: absolute; top: 12px; left: 50%; transform: translateX(-50%); font-family: 'JetBrains Mono', monospace; font-size: 12px;
+  color: var(--text2); padding: 6px 16px; background: rgba(7,7,15,0.8); border: 1px solid var(--border2); border-radius: 30px; z-index: 10; pointer-events: none; opacity: 0; transition: opacity 0.4s; white-space: nowrap;
+}
+.anim-annotation.visible { opacity: 1; }
+.graph-legend { padding: 12px 24px 16px; display: flex; gap: 16px; flex-wrap: wrap; border-top: 1px solid var(--border); }
+.leg-item { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+.leg-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.leg-line { width: 18px; height: 2px; flex-shrink: 0; }
+.bar-section { padding: 12px 24px 20px; border-top: 1px solid var(--border); }
+.bar-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 12px; }
+.bar-row { display: flex; align-items: flex-end; gap: 4px; height: 60px; }
+.bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; transition: opacity 0.2s; }
+.bar-col:hover { opacity: 0.8; }
+.bar-fill { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; transition: height 0.5s cubic-bezier(0.4,0,0.2,1); }
+.bar-n { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text3); }
+.bar-s { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; text-align: center; }
+
+.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; animation: cardIn 0.5s cubic-bezier(0.4,0,0.2,1) both; position: relative; }
+@keyframes cardIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
+.step-card-top { padding: 20px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.step-card-left { display: flex; align-items: flex-start; gap: 14px; }
+.snum { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 700; color: white; flex-shrink: 0; }
+.sname { font-size: 17px; font-weight: 700; margin-bottom: 3px; }
+.sdesc { font-size: 13px; color: var(--text2); }
+.s-badges { display: flex; gap: 8px; align-items: center; flex-shrink: 0; margin-top: 4px; }
+.sbadge { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 12px; border-radius: 20px; }
+.sbadge.mod { background: rgba(92,252,232,0.1); color: var(--accent3); border: 1px solid rgba(92,252,232,0.2); }
+.sbadge.nomod { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+.toggle-btn { background: none; border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; color: var(--text3); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+.toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.08); }
+.step-explain { margin: 16px 24px; padding: 14px 18px; background: var(--bg3); border-radius: 10px; border-left: 3px solid; font-size: 13.5px; color: var(--text2); line-height: 1.75; }
+.step-explain code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; }
+.prods-lbl { padding: 0 24px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); }
+.prods-list { padding: 0 24px 24px; display: flex; flex-direction: column; gap: 6px; }
+.prod-row { display: flex; align-items: flex-start; gap: 0; background: var(--bg3); border: 1px solid var(--border); border-radius: 10px; padding: 11px 16px; font-family: 'JetBrains Mono', monospace; font-size: 13px; transition: border-color 0.2s; position: relative; }
+.prod-row::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; border-radius: 10px 0 0 10px; background: var(--c, transparent); opacity: 0; transition: opacity 0.2s; }
+.prod-row:hover { border-color: var(--border2); }
+.prod-row:hover::before { opacity: 1; }
+.prod-row.new-row { border-color: rgba(252,201,92,0.2); background: rgba(252,201,92,0.03); animation: newProd 1.5s ease; }
+@keyframes newProd { 0%{background:rgba(252,201,92,0.12)} 100%{background:rgba(252,201,92,0.03)} }
+.lhs { color: #7c5cfc; font-weight: 700; min-width: 36px; }
+.arr { color: var(--text3); margin: 0 8px; }
+.rhs { flex: 1; display: flex; flex-wrap: wrap; gap: 4px 2px; align-items: center; }
+.alt-group { display: flex; flex-wrap: wrap; gap: 3px; align-items: center; }
+.alt-pipe { color: var(--text3); margin: 0 4px; font-size: 15px; }
+.tok-t { color: var(--accent3); background: rgba(92,252,232,0.07); padding: 1px 7px; border-radius: 5px; border: 1px solid rgba(92,252,232,0.15); font-size: 12px; }
+.tok-nt { color: var(--accent); background: rgba(124,92,252,0.08); padding: 1px 7px; border-radius: 5px; border: 1px solid rgba(124,92,252,0.15); font-size: 12px; }
+.tok-eps { color: var(--accent4); background: rgba(252,201,92,0.08); padding: 1px 7px; border-radius: 5px; border: 1px solid rgba(252,201,92,0.15); font-size: 12px; font-style: italic; }
+.tok-new { color: var(--accent2); background: rgba(252,92,138,0.08); padding: 1px 7px; border-radius: 5px; border: 1px solid rgba(252,92,138,0.2); font-size: 12px; position: relative; }
+.tok-new::after { content:'NEW'; position:absolute; top:-9px; right:-3px; font-size:7px; background:var(--accent2); color:white; padding:1px 3px; border-radius:3px; }
+
+.final-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 24px; overflow: hidden; position: relative; }
+.final-header-bar { padding: 0 28px; display: flex; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0; }
+.ftab { padding: 16px 20px; background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
+.ftab.active { color: var(--text); border-bottom-color: var(--accent4); }
+.ftab-content { padding: 28px; display: none; }
+.ftab-content.active { display: block; }
+.fstats { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 12px; margin-bottom: 20px; }
+.fstat { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; text-align: center; }
+.fstat-val { font-family: 'Instrument Serif', serif; font-size: 36px; color: var(--accent); display: block; }
+.fstat-val.ok { color: var(--accent3); }
+.fstat-val.gold { color: var(--accent4); }
+.fstat-lbl { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+.form-note { background: rgba(124,92,252,0.07); border: 1px solid rgba(124,92,252,0.15); border-radius: 12px; padding: 16px 20px; font-size: 13.5px; color: var(--text2); line-height: 1.7; margin-bottom: 20px; }
+.form-note strong { color: var(--accent); }
+.export-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); }
+.export-btn { padding: 8px 18px; border-radius: 10px; font-family: 'JetBrains Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+.export-btn-plain { border: 1px solid var(--border2); background: transparent; color: var(--text2); }
+.export-btn-plain:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.06); }
+.export-btn-copy { border: 1px solid rgba(92,252,232,0.25); background: rgba(92,252,232,0.06); color: var(--accent3); }
+.export-btn-copy:hover { background: rgba(92,252,232,0.12); }
+
+.welcome-state { text-align: center; padding: 80px 20px; color: var(--text3); }
+.welcome-state .wi { font-size: 64px; margin-bottom: 20px; display: block; }
+.welcome-state h3 { font-family: 'Instrument Serif', serif; font-size: 24px; color: var(--text2); margin-bottom: 8px; }
+.welcome-state p { font-size: 14px; max-width: 360px; margin: 0 auto; line-height: 1.7; }
+.scroll-down-cue { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-top: 40px; cursor: pointer; transition: transform 0.3s; }
+.scroll-down-cue:hover { transform: translateY(4px); }
+.sdc-text { font-family: 'JetBrains Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.sdc-arrow { width: 44px; height: 44px; border: 1.5px solid rgba(92,252,232,0.3); border-radius: 50%; display: flex; align-items: center; justify-content: center; animation: arrowBounce 2s ease-in-out infinite; color: var(--accent3); }
+
+@media(max-width: 768px) {
+  .hero h1 { letter-spacing: -2px; }
+  .results-layout { grid-template-columns: 1fr; }
+  .steps-nav { position: static; }
+  .bar-s { display: none; }
+  .algo-steps-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-trail" id="cursorTrail"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<div id="root"></div>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+function initCursor() {
+  const cursor = document.getElementById('cursor');
+  const trail = document.getElementById('cursorTrail');
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+  document.addEventListener('mousemove', e => {
+    tx = e.clientX; ty = e.clientY;
+    cursor.style.left = tx + 'px'; cursor.style.top = ty + 'px';
+  });
+  function animTrail() {
+    cx += (tx - cx) * 0.15; cy += (ty - cy) * 0.15;
+    trail.style.left = cx + 'px'; trail.style.top = cy + 'px';
+    requestAnimationFrame(animTrail);
+  }
+  animTrail();
+}
+
+function initScrollProgress() {
+  const bar = document.getElementById('scrollProgress');
+  function update() {
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = h > 0 ? (window.scrollY / h) * 100 : 0;
+    bar.style.width = pct + '%';
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  update();
+}
+
+// Side-by-side arrows to jump between sections
+function SectionNavArrows({ prevId, nextId, className }) {
+  const nav = (id) => {
+    if (!id) return;
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  return (
+    <div className={`section-nav-arrows ${className || ''}`}>
+      <button 
+        className="nav-arrow-btn" 
+        onClick={(e) => { e.stopPropagation(); nav(prevId); }} 
+        disabled={!prevId} 
+        title="Previous Section"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="18 15 12 9 6 15"></polyline>
+        </svg>
+      </button>
+      <button 
+        className="nav-arrow-btn" 
+        onClick={(e) => { e.stopPropagation(); nav(nextId); }} 
+        disabled={!nextId} 
+        title="Next Section"
+      >
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+      </button>
+    </div>
+  );
+}
+
+function parseGrammar(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l && !l.startsWith('//') && !l.startsWith('#'));
+  if (!lines.length) throw new Error('Grammar is empty.');
+  const productions = {}; let startSymbol = null;
+
+  for (const line of lines) {
+    const ai = line.includes('→') ? line.indexOf('→') : line.includes('->') ? line.indexOf('->') : -1;
+    if (ai === -1) throw new Error(`No arrow (→ or ->) found in: "${line}"`);
+    const al = line[ai] === '→' ? 1 : 2;
+    const lhs = line.slice(0, ai).trim();
+    if (!lhs) throw new Error(`Empty left-hand side in: "${line}"`);
+    if (!/^[A-Z][A-Z0-9'_]*$/.test(lhs)) throw new Error(`LHS must start with uppercase letter: "${lhs}"`);
+    if (!startSymbol) startSymbol = lhs;
+    if (!productions[lhs]) productions[lhs] = [];
+
+    const rhs = line.slice(ai + al);
+    for (const alt of rhs.split('|')) {
+      const tr = alt.trim();
+      if (!tr) continue;
+      const tokens = [];
+      let i = 0;
+      while (i < tr.length) {
+        if (tr[i] === ' ') { i++; continue; }
+        if (/[A-Z]/.test(tr[i])) {
+          let j = i;
+          while (j < tr.length && /[A-Z0-9'_]/.test(tr[j])) j++;
+          tokens.push(tr.slice(i, j)); i = j;
+        } else if (tr.slice(i, i + 7) === 'epsilon') { tokens.push('ε'); i += 7; }
+        else if (tr.slice(i, i + 3) === 'eps') { tokens.push('ε'); i += 3; }
+        else { tokens.push(tr[i]); i++; }
+      }
+      if (!tokens.length) continue;
+      const norm = tokens.map(s => (s === 'e' && tokens.length === 1) ? 'ε' : s);
+      if (norm.includes('ε') && norm.length > 1) throw new Error(`Epsilon cannot be mixed with other symbols in: "${line}"`);
+      productions[lhs].push(norm);
+    }
+  }
+
+  if (!startSymbol) throw new Error('No start symbol found.');
+
+  const defined = new Set(Object.keys(productions));
+  for (const [lhs, ps] of Object.entries(productions)) {
+    for (const p of ps) {
+      for (const s of p) {
+        if (s !== 'ε' && /^[A-Z]/.test(s) && !defined.has(s)) {
+          throw new Error(`Non-terminal "${s}" used in rule "${lhs}" but never defined.`);
+        }
+      }
+    }
+  }
+
+  const nonterminals = new Set(Object.keys(productions));
+  const terminals = new Set();
+  for (const ps of Object.values(productions))
+    for (const p of ps) for (const s of p)
+      if (s !== 'ε' && !/^[A-Z]/.test(s)) terminals.add(s);
+
+  return { productions, startSymbol, nonterminals, terminals };
+}
+
+function cloneP(p) {
+  const r = {};
+  for (const [k, v] of Object.entries(p)) r[k] = v.map(a => [...a]);
+  return r;
+}
+function dedup(rules) {
+  const s = new Set();
+  return rules.filter(p => { const k = JSON.stringify(p); if (s.has(k)) return false; s.add(k); return true; });
+}
+function countP(p) { return Object.values(p).reduce((s, a) => s + a.length, 0); }
+function getAllNTs(p) { return new Set(Object.keys(p)); }
+
+function checkCNF(p) {
+  const nts = getAllNTs(p);
+  for (const ps of Object.values(p)) for (const r of ps) {
+    if (r.length === 1 && r[0] === 'ε') continue;
+    if (r.length === 1 && !nts.has(r[0])) continue;
+    if (r.length === 2 && nts.has(r[0]) && nts.has(r[1])) continue;
+    return false;
+  }
+  return true;
+}
+
+function checkGNF(p) {
+  const isT = s => s !== 'ε' && /^[^A-Z]/.test(s);
+  const isNT = s => /^[A-Z]/.test(s);
+  for (const ps of Object.values(p)) for (const r of ps) {
+    if (r[0] === 'ε') continue;
+    if (!isT(r[0])) return false;
+    if (r.slice(1).some(s => !isNT(s))) return false;
+  }
+  return true;
+}
+
+function validateGrammarOnly(text) {
+  try {
+    const g = parseGrammar(text);
+    return { ok: true, nts: g.nonterminals.size, ts: g.terminals.size, rules: countP(g.productions), start: g.startSymbol };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+function toCNF(grammar) {
+  const steps = [];
+  let { productions, startSymbol, nonterminals, terminals } = grammar;
+  productions = cloneP(productions);
+  nonterminals = new Set(nonterminals);
+  terminals = new Set(terminals);
+  let vc = 0;
+  const used = new Set([...nonterminals]);
+
+  function fresh(pfx = 'X') {
+    let v;
+    do { vc++; v = pfx + vc; } while (used.has(v));
+    used.add(v); nonterminals.add(v); return v;
+  }
+
+  {
+    const onRHS = Object.values(productions).some(ps => ps.some(p => p.includes(startSymbol)));
+    let ns = null;
+    if (onRHS) {
+      ns = fresh('S0');
+      productions[ns] = [[startSymbol]];
+    }
+    const ps = startSymbol;
+    if (ns) startSymbol = ns;
+    steps.push({
+      id: 1, name: 'New Start Symbol', phase: 'cnf',
+      desc: 'Ensure start symbol does not appear on any RHS.',
+      expl: ns
+        ? `Introduced <code>${ns} → ${ps}</code> since <code>${ps}</code> appeared on a RHS.`
+        : `<code>${ps}</code> never appears on a RHS — no change.`,
+      productions: cloneP(productions), changed: !!ns, newNTs: ns ? new Set([ns]) : new Set()
+    });
+  }
+
+  {
+    const nullable = new Set();
+    let ch = true;
+    while (ch) {
+      ch = false;
+      for (const [nt, ps] of Object.entries(productions)) {
+        if (nullable.has(nt)) continue;
+        if (ps.some(p => p.length === 1 && p[0] === 'ε') ||
+            ps.some(p => p.every(s => nullable.has(s)))) {
+          nullable.add(nt); ch = true;
+        }
+      }
+    }
+
+    for (const [nt, ps] of Object.entries(productions)) {
+      const nm = new Map();
+      for (const p of ps) {
+        nm.set(JSON.stringify(p), p);
+        const npos = p.map((s, i) => nullable.has(s) ? i : -1).filter(x => x >= 0);
+        for (let mask = 1; mask < (1 << npos.length); mask++) {
+          const rem = new Set(npos.filter((_, b) => mask & (1 << b)));
+          const np = p.filter((_, i) => !rem.has(i));
+          if (np.length > 0) nm.set(JSON.stringify(np), np);
+        }
+      }
+      productions[nt] = [...nm.values()];
+    }
+
+    for (const [nt, ps] of Object.entries(productions)) {
+      productions[nt] = ps.filter(p => !(p.length === 1 && p[0] === 'ε'));
+      if (!productions[nt].length) delete productions[nt];
+    }
+
+    if (nullable.has(startSymbol)) {
+      if (!productions[startSymbol]) productions[startSymbol] = [];
+      if (!productions[startSymbol].some(p => p.length === 1 && p[0] === 'ε')) {
+        productions[startSymbol].push(['ε']);
+      }
+    }
+
+    for (const k of Object.keys(productions)) {
+      productions[k] = dedup(productions[k]);
+      if (!productions[k].length) delete productions[k];
+    }
+
+    steps.push({
+      id: 2, name: 'Eliminate ε-Productions', phase: 'cnf',
+      desc: 'Remove epsilon rules; add combination alternatives.',
+      expl: nullable.size
+        ? `Nullable NTs: {${[...nullable].join(', ')}}. Added all non-empty combinations.`
+        : 'No nullable non-terminals — no change.',
+      productions: cloneP(productions), changed: nullable.size > 0, newNTs: new Set()
+    });
+  }
+
+  {
+    function unitClosure(nt) {
+      const c = new Set([nt]), q = [nt];
+      while (q.length) {
+        const cur = q.shift();
+        for (const p of (productions[cur] || [])) {
+          if (p.length === 1 && nonterminals.has(p[0]) && !c.has(p[0])) {
+            c.add(p[0]); q.push(p[0]);
+          }
+        }
+      }
+      return c;
+    }
+
+    let unitCount = 0;
+    for (const ps of Object.values(productions))
+      for (const p of ps) if (p.length === 1 && nonterminals.has(p[0])) unitCount++;
+
+    const np = {};
+    for (const nt of Object.keys(productions)) {
+      const cl = unitClosure(nt);
+      const s = new Set();
+      np[nt] = [];
+      for (const r of cl) {
+        for (const p of (productions[r] || [])) {
+          if (!(p.length === 1 && nonterminals.has(p[0]))) {
+            const k = JSON.stringify(p);
+            if (!s.has(k)) { s.add(k); np[nt].push([...p]); }
+          }
+        }
+      }
+      if (!np[nt].length) delete np[nt];
+    }
+    for (const k in productions) delete productions[k];
+    Object.assign(productions, np);
+
+    steps.push({
+      id: 3, name: 'Eliminate Unit Productions', phase: 'cnf',
+      desc: 'Replace A→B chains with actual productions.',
+      expl: unitCount > 0 ? `Found ${unitCount} unit rule(s). Inlined transitive closures.` : 'No unit productions — no change.',
+      productions: cloneP(productions), changed: unitCount > 0, newNTs: new Set()
+    });
+  }
+
+  {
+    const gen = new Set([...terminals, 'ε']);
+    let ch = true;
+    while (ch) {
+      ch = false;
+      for (const [nt, ps] of Object.entries(productions)) {
+        if (gen.has(nt)) continue;
+        if (ps.some(p => p.every(s => gen.has(s)))) { gen.add(nt); ch = true; }
+      }
+    }
+    const ngc = Object.keys(productions).filter(x => !gen.has(x)).length;
+    for (const k of Object.keys(productions)) {
+      if (!gen.has(k)) { delete productions[k]; continue; }
+      productions[k] = productions[k].filter(p => p.every(s => gen.has(s)));
+      if (!productions[k].length) delete productions[k];
+    }
+
+    const reach = new Set([startSymbol]);
+    const q = [startSymbol];
+    while (q.length) {
+      const c = q.shift();
+      for (const p of (productions[c] || [])) {
+        for (const s of p) {
+          if (!reach.has(s)) { reach.add(s); q.push(s); }
+        }
+      }
+    }
+    const nrc = Object.keys(productions).filter(x => !reach.has(x)).length;
+    for (const k of Object.keys(productions)) if (!reach.has(k)) delete productions[k];
+    nonterminals = new Set(Object.keys(productions));
+
+    steps.push({
+      id: 4, name: 'Remove Useless Symbols', phase: 'cnf',
+      desc: 'Remove non-generating and unreachable symbols.',
+      expl: `Non-generating removed: ${ngc}. Unreachable removed: ${nrc}. ${ngc + nrc === 0 ? 'Grammar is already clean.' : ''}`,
+      productions: cloneP(productions), changed: ngc + nrc > 0, newNTs: new Set()
+    });
+  }
+
+  {
+    const tm = {};
+    const added = new Set();
+
+    function termVar(t) {
+      if (!tm[t]) {
+        const v = fresh('T');
+        tm[t] = v;
+        productions[v] = [[t]];
+        added.add(v);
+      }
+      return tm[t];
+    }
+
+    const snap = [...Object.keys(productions)];
+    for (const nt of snap) {
+      productions[nt] = productions[nt].map(p => {
+        if (p.length <= 1) return p;
+        return p.map(s => {
+          if (s === 'ε') return s;
+          if (terminals.has(s)) return termVar(s);
+          return s;
+        });
+      });
+    }
+
+    const bCache = {};
+    function binarize(syms) {
+      if (syms.length <= 2) return syms;
+      const key = syms.join('\x01');
+      if (bCache[key]) return [syms[0], bCache[key]];
+      const rest = binarize(syms.slice(1));
+      let restNT;
+      if (rest.length === 1) {
+        restNT = rest[0];
+      } else {
+        const restKey = rest.join('\x01');
+        if (bCache[restKey]) {
+          restNT = bCache[restKey];
+        } else {
+          restNT = fresh('B');
+          productions[restNT] = [rest];
+          added.add(restNT);
+          bCache[restKey] = restNT;
+        }
+      }
+      bCache[key] = restNT;
+      return [syms[0], restNT];
+    }
+
+    for (const nt of Object.keys(productions)) {
+      productions[nt] = productions[nt].map(p => p.length >= 3 ? binarize(p) : p);
+    }
+
+    const termPairs = Object.entries(tm).map(([t, v]) => `<code>${v}→${t}</code>`).join(', ') || 'none';
+    steps.push({
+      id: 5, name: 'Convert to Proper CNF', phase: 'cnf',
+      desc: 'Terminal proxies for mixed rules; binarize long productions.',
+      expl: `Terminal proxies: ${termPairs}. All rules now A→BC or A→a (or A→ε for start if needed).`,
+      productions: cloneP(productions), changed: true, newNTs: added
+    });
+  }
+
+  return { steps, finalProductions: productions, startSymbol, nonterminals };
+}
+
+function toGNF(cnfResult) {
+  const steps = [];
+  let productions = cloneP(cnfResult.finalProductions);
+  let { startSymbol } = cnfResult;
+  const isT = s => s !== 'ε' && /^[^A-Z]/.test(s);
+  const isNT = s => /^[A-Z]/.test(s);
+
+  let ntList = [startSymbol, ...Object.keys(productions).filter(x => x !== startSymbol)];
+  const ntOrder = {};
+  ntList.forEach((n, i) => ntOrder[n] = i);
+
+  steps.push({
+    id: 6, name: 'Order Non-Terminals', phase: 'gnf',
+    desc: 'Assign strict ordering A₁ < A₂ < ... < Aₙ.',
+    expl: `Order assigned: ${ntList.map((n, i) => `A${i+1}=${n}`).join(', ')}.`,
+    productions: cloneP(productions), changed: false, newNTs: new Set()
+  });
+
+  {
+    const cur = [...ntList];
+    for (let i = 0; i < cur.length; i++) {
+      const Ai = cur[i];
+      if (!productions[Ai]) continue;
+
+      for (let j = 0; j < i; j++) {
+        const Aj = cur[j];
+        if (!productions[Aj]) continue;
+        const nr = [];
+        for (const p of productions[Ai]) {
+          if (p[0] === Aj) {
+            for (const s of productions[Aj]) nr.push([...s, ...p.slice(1)]);
+          } else {
+            nr.push([...p]);
+          }
+        }
+        productions[Ai] = dedup(nr);
+      }
+
+      const rec = (productions[Ai] || []).filter(p => p[0] === Ai);
+      const nonrec = (productions[Ai] || []).filter(p => p[0] !== Ai);
+
+      if (rec.length > 0) {
+        const Ap = Ai + "'";
+        const nAi = [];
+        for (const b of nonrec) {
+          nAi.push([...b]);
+          nAi.push([...b, Ap]);
+        }
+        const nAp = [];
+        for (const fr of rec) {
+          const a = fr.slice(1);
+          if (a.length > 0) {
+            nAp.push([...a]);
+            nAp.push([...a, Ap]);
+          }
+        }
+        productions[Ai] = dedup(nAi.length ? nAi : nonrec);
+        if (nAp.length) productions[Ap] = dedup(nAp);
+        ntOrder[Ap] = cur.length;
+        cur.push(Ap);
+      }
+    }
+    ntList = Object.keys(productions);
+    const primeNTs = new Set(Object.keys(productions).filter(k => k.includes("'")));
+    steps.push({
+      id: 7, name: 'Eliminate Left Recursion', phase: 'gnf',
+      desc: "Apply Paull's algorithm: substitute lower NTs, then remove immediate left recursion.",
+      expl: primeNTs.size > 0
+        ? `Introduced prime variables: {${[...primeNTs].join(', ')}}. Left recursion eliminated.`
+        : 'No left recursion found — no change.',
+      productions: cloneP(productions), changed: true, newNTs: primeNTs
+    });
+  }
+
+  {
+    let any = true, it = 0;
+    while (any && it < 80) {
+      any = false; it++;
+      for (const nt of Object.keys(productions)) {
+        const nr = [];
+        for (const p of productions[nt]) {
+          if (!p.length) { nr.push(p); continue; }
+          const f = p[0];
+          if (!isNT(f) || isT(f)) {
+            nr.push(p);
+          } else if (f === nt) {
+            nr.push(p);
+          } else if (productions[f]) {
+            for (const s of productions[f]) nr.push([...s, ...p.slice(1)]);
+            any = true;
+          } else {
+            nr.push(p);
+          }
+        }
+        productions[nt] = dedup(nr);
+      }
+    }
+
+    steps.push({
+      id: 8, name: 'Back-Substitution to GNF', phase: 'gnf',
+      desc: 'Substitute until every production starts with a terminal.',
+      expl: `After ${it} passes: all productions now start with a terminal (A→aα where a∈Σ, α∈V*).`,
+      productions: cloneP(productions), changed: true, newNTs: new Set()
+    });
+  }
+
+  return { steps, finalProductions: productions, startSymbol };
+}
+
+function productionsToText(productions) {
+  return Object.entries(productions)
+    .map(([lhs, ps]) => `${lhs} → ${ps.map(p => p.join(' ')).join(' | ')}`)
+    .join('\n');
+}
+
+const COLORS = {
+  1:'#7c5cfc', 2:'#9c5cfc', 3:'#bc5cfc', 4:'#dc5cdc',
+  5:'#fc5cac', 6:'#5cfce8', 7:'#5ca8fc', 8:'#fcdc5c'
+};
+
+const EXAMPLES = {
+  expr:`S → S + T | T\nT → T * F | F\nF → ( S ) | a`,
+  palindrome:`S → a S a | b S b | a | b | ε`,
+  balanced:`S → ( S ) | S S | ε`,
+  simple:`S → A B C | a\nA → a A | ε\nB → b B | b\nC → c`,
+  unit:`S → A | a B\nA → B | a\nB → b | S`,
+};
+
+function StickyNav({ sections, activeSection, onNavClick, onConvertClick }) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handler, { passive: true });
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  const navItems = [
+    { id: 'hero', label: 'Home', icon: '⌂' },
+    { id: 'about', label: 'About', icon: '◈' },
+    { id: 'cheatsheet', label: 'Algorithm', icon: '◉' },
+    { id: 'calculator', label: 'Convert', icon: '⚡' },
+    { id: 'results', label: 'Results', icon: '◆' },
+  ];
+
+  return (
+    <nav className={`sticky-nav${scrolled?' scrolled':''}`}>
+      <div className="nav-brand" onClick={() => onNavClick('hero')}>
+        <div className="nav-logo">G</div>
+        <div className="nav-brand-name">Grammar<em>Forge</em></div>
+      </div>
+      <div className="nav-links">
+        {navItems.map(item => (
+          <button
+            key={item.id}
+            className={`nav-link${activeSection === item.id ? ' active' : ''}`}
+            onClick={() => onNavClick(item.id)}
+          >
+            <span className="nav-link-icon">{item.icon}</span>
+            {item.label}
+          </button>
+        ))}
+      </div>
+      <button className="nav-cta" onClick={() => onNavClick('calculator')}>
+        ⚡ Try Now
+      </button>
+    </nav>
+  );
+}
+
+function GrammarGraph({ productions, startSymbol, prevProductions, stepInfo }) {
+  const svgRef = useRef(null);
+  const simRef = useRef(null);
+  const [annotation, setAnnotation] = useState('');
+  const [showAnnotation, setShowAnnotation] = useState(false);
+
+  function showAnn(msg, duration = 2500) {
+    setAnnotation(msg); setShowAnnotation(true);
+    setTimeout(() => setShowAnnotation(false), duration);
+  }
+
+  useEffect(() => {
+    if (!svgRef.current || !productions) return;
+    const container = svgRef.current.parentElement;
+    const W = container.clientWidth || 800;
+    const H = 420;
+
+    d3.select(svgRef.current).selectAll('*').remove();
+    const svg = d3.select(svgRef.current).attr('width', W).attr('height', H);
+
+    const defs = svg.append('defs');
+    ['nt','t'].forEach(type => {
+      defs.append('marker')
+        .attr('id', `arrow-${type}`)
+        .attr('viewBox','0 -5 10 10')
+        .attr('refX', 20).attr('refY', 0)
+        .attr('markerWidth', 6).attr('markerHeight', 6)
+        .attr('orient', 'auto')
+        .append('path').attr('d','M0,-5L10,0L0,5')
+        .attr('fill', type === 'nt' ? '#7c5cfc' : '#5cfce8').attr('opacity', 0.7);
+    });
+
+    const filter = defs.append('filter').attr('id','glow');
+    filter.append('feGaussianBlur').attr('stdDeviation','4').attr('result','blur');
+    const merge = filter.append('feMerge');
+    merge.append('feMergeNode').attr('in','blur');
+    merge.append('feMergeNode').attr('in','SourceGraphic');
+
+    const nts = new Set(Object.keys(productions));
+    const terminals = new Set();
+    for (const ps of Object.values(productions))
+      for (const p of ps) for (const s of p)
+        if (s !== 'ε' && !/^[A-Z]/.test(s)) terminals.add(s);
+
+    const prevNTs = prevProductions ? new Set(Object.keys(prevProductions)) : new Set();
+    const nodes = [];
+    const ntArr = [startSymbol, ...Object.keys(productions).filter(x => x !== startSymbol)];
+    const tArr = [...terminals];
+
+    const R_NT = Math.max(70, Math.min(130, ntArr.length * 20));
+    const R_T = R_NT + 100;
+    const cx = W / 2, cy = H / 2;
+
+    ntArr.forEach((id, i) => {
+      const a = (2 * Math.PI * i / ntArr.length) - Math.PI / 2;
+      nodes.push({
+        id, type: 'nt', isStart: id === startSymbol,
+        isNew: !prevNTs.has(id) && prevNTs.size > 0,
+        x: cx + Math.cos(a) * R_NT, y: cy + Math.sin(a) * R_NT, r: 22
+      });
+    });
+    tArr.forEach((id, i) => {
+      const a = (2 * Math.PI * i / Math.max(tArr.length, 1)) - Math.PI / 2;
+      nodes.push({ id, type: 'terminal', isNew: false, x: cx + Math.cos(a) * R_T, y: cy + Math.sin(a) * R_T, r: 14 });
+    });
+
+    const edges = [];
+    const seen = new Set();
+    for (const [lhs, ps] of Object.entries(productions)) {
+      for (const p of ps) {
+        for (const s of p) {
+          if (s === 'ε' || !nodes.find(n => n.id === s)) continue;
+          const k = lhs + '→' + s;
+          if (!seen.has(k)) { seen.add(k); edges.push({ source: lhs, target: s }); }
+        }
+      }
+    }
+
+    const sim = d3.forceSimulation(nodes)
+      .force('link', d3.forceLink(edges).id(d => d.id).distance(d => d.target.type === 'terminal' ? 110 : 90).strength(0.3))
+      .force('charge', d3.forceManyBody().strength(-300))
+      .force('collision', d3.forceCollide().radius(d => d.r + 20))
+      .force('center', d3.forceCenter(cx, cy).strength(0.15));
+    simRef.current = sim;
+
+    const gs = 40;
+    const gridG = svg.append('g');
+    for (let x = 0; x < W; x += gs) gridG.append('line').attr('x1',x).attr('y1',0).attr('x2',x).attr('y2',H).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
+    for (let y = 0; y < H; y += gs) gridG.append('line').attr('x1',0).attr('y1',y).attr('x2',W).attr('y2',y).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
+
+    const g = svg.append('g');
+    
+    // Dynamic Auto-Zooming based on graph size
+    const maxRadius = R_T + 40; // padding
+    const initialScale = Math.min(1.2, Math.min(W / (maxRadius * 2), H / (maxRadius * 2)));
+    
+    const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', e => g.attr('transform', e.transform));
+    svg.call(zoom);
+    
+    // Apply calculated zoom to fit graph perfectly
+    svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2).scale(initialScale).translate(-cx, -cy));
+
+    const link = g.append('g').selectAll('line').data(edges).join('line')
+      .attr('stroke', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? '#5cfce8' : '#7c5cfc')
+      .attr('stroke-opacity', 0.4).attr('stroke-width', 1.5)
+      .attr('stroke-dasharray', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? '4,4' : 'none')
+      .attr('marker-end', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? 'url(#arrow-t)' : 'url(#arrow-nt)');
+
+    const node = g.append('g').selectAll('g').data(nodes).join('g')
+      .attr('cursor', 'pointer')
+      .call(d3.drag()
+        .on('start', (event, d) => { if (!event.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+        .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
+        .on('end', (event, d) => { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+      );
+
+    node.filter(d => d.isStart).append('circle')
+      .attr('r', 30).attr('fill','none').attr('stroke','#fcc95c')
+      .attr('stroke-width',1).attr('stroke-opacity',0.3).attr('stroke-dasharray','4,4');
+
+    node.each(function(d) {
+      const nd = d3.select(this);
+      if (d.type === 'nt') {
+        nd.append('circle').attr('r', d.r)
+          .attr('fill', d.isNew ? 'rgba(252,92,138,0.15)' : (d.isStart ? 'rgba(252,201,92,0.12)' : 'rgba(124,92,252,0.12)'))
+          .attr('stroke', d.isNew ? '#fc5c8a' : (d.isStart ? '#fcc95c' : '#7c5cfc'))
+          .attr('stroke-width', d.isStart ? 2.5 : 1.5)
+          .attr('filter', d.isStart ? 'url(#glow)' : null);
+      } else {
+        nd.append('rect')
+          .attr('x', -d.r).attr('y', -d.r * 0.65)
+          .attr('width', d.r * 2).attr('height', d.r * 1.3).attr('rx', 5)
+          .attr('fill','rgba(92,252,232,0.08)').attr('stroke','#5cfce8').attr('stroke-width',1.5);
+      }
+    });
+
+    node.append('text')
+      .attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill', d => d.isNew ? '#fc5c8a' : (d.isStart ? '#fcc95c' : (d.type === 'nt' ? '#c8c8ff' : '#5cfce8')))
+      .attr('font-family','JetBrains Mono, monospace')
+      .attr('font-weight','700')
+      .attr('font-size', d => d.type === 'nt' ? '13px' : '11px')
+      .text(d => d.id);
+
+    const tooltip = svg.append('g').style('display','none');
+    const tooltipBg = tooltip.append('rect').attr('rx',8).attr('fill','rgba(20,20,34,0.95)').attr('stroke','rgba(255,255,255,0.1)').attr('stroke-width',1);
+    const tooltipText = tooltip.append('text').attr('font-family','JetBrains Mono,monospace').attr('font-size','11px').attr('fill','#9898b8');
+
+    node.on('mouseover', function(event, d) {
+      d3.select(this).selectAll('circle,rect').attr('stroke-width', 2.5);
+      const ps = productions[d.id];
+      tooltipText.text(ps ? `${d.id}: ${ps.length} rule${ps.length !== 1 ? 's' : ''}` : `terminal: "${d.id}"`);
+      const bb = tooltipText.node().getBBox();
+      const pad = 10;
+      tooltipBg.attr('x',bb.x-pad).attr('y',bb.y-pad).attr('width',bb.width+pad*2).attr('height',bb.height+pad*2);
+      tooltip.style('display',null).attr('transform',`translate(${d.x+30},${d.y-20})`);
+    }).on('mouseout', function(event, d) {
+      d3.select(this).selectAll('circle').attr('stroke-width', d.isStart ? 2.5 : 1.5);
+      d3.select(this).selectAll('rect').attr('stroke-width', 1.5);
+      tooltip.style('display','none');
+    });
+
+    sim.on('tick', () => {
+      link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+          .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      node.attr('transform', d => `translate(${d.x},${d.y})`);
+    });
+
+    if (stepInfo) setTimeout(() => showAnn(`Step ${stepInfo.id}: ${stepInfo.name}`), 200);
+    return () => { sim.stop(); };
+  }, [productions, startSymbol, prevProductions, stepInfo]);
+
+  return (
+    <div style={{ position: 'relative' }}>
+      <div className={`anim-annotation${showAnnotation ? ' visible' : ''}`}>{annotation}</div>
+      <svg ref={svgRef} style={{ display:'block', width:'100%', height: 420 }} />
+    </div>
+  );
+}
+
+function Token({ sym, nts, newNTs }) {
+  if (sym === 'ε') return <span className="tok-eps">ε</span>;
+  if (newNTs && newNTs.has(sym)) return <span className="tok-new">{sym}</span>;
+  if (nts && nts.has(sym)) return <span className="tok-nt">{sym}</span>;
+  return <span className="tok-t">{sym}</span>;
+}
+
+function ProdsList({ productions, newNTs }) {
+  const nts = useMemo(() => getAllNTs(productions), [productions]);
+  return (
+    <div className="prods-list">
+      {Object.entries(productions).map(([lhs, prods]) => (
+        <div key={lhs} className={`prod-row${newNTs && newNTs.has(lhs) ? ' new-row' : ''}`} style={{ '--c': COLORS[1] }}>
+          <span className="lhs">{lhs}</span>
+          <span className="arr">→</span>
+          <span className="rhs">
+            {prods.map((p, i) => (
+              <React.Fragment key={i}>
+                {i > 0 && <span className="alt-pipe">|</span>}
+                <span className="alt-group">
+                  {p.map((s, j) => <Token key={j} sym={s} nts={nts} newNTs={newNTs || new Set()} />)}
+                </span>
+              </React.Fragment>
+            ))}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function VizSection({ allSteps, origGrammar, startSymbol }) {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const playRef = useRef(null);
+  const total = allSteps.length;
+
+  const curProds = step === 0 ? origGrammar.productions : allSteps[step - 1]?.productions;
+  const prevProds = step <= 1 ? origGrammar.productions : allSteps[step - 2]?.productions;
+  const stepInfo = step > 0 ? allSteps[step - 1] : null;
+  const lbl = step === 0 ? 'Original CFG' : `Step ${allSteps[step-1].id}: ${allSteps[step-1].name}`;
+
+  const counts = useMemo(() => {
+    const c = [{ lbl: 'CFG', n: countP(origGrammar.productions), col: '#55556a' }];
+    allSteps.forEach(s => c.push({ lbl: `S${s.id}`, n: countP(s.productions), col: COLORS[s.id] }));
+    return c;
+  }, [allSteps, origGrammar]);
+  const maxN = Math.max(...counts.map(d => d.n), 1);
+
+  useEffect(() => {
+    if (playing) {
+      playRef.current = setInterval(() => {
+        setStep(p => { if (p >= total) { setPlaying(false); return p; } return p + 1; });
+      }, 1600);
+    } else clearInterval(playRef.current);
+    return () => clearInterval(playRef.current);
+  }, [playing, total]);
+
+  return (
+    <div className="graph-card" id="graph-section">
+      <div className="graph-header">
+        <div className="graph-title">Grammar Graph <span className="g-tag">D3 Force</span></div>
+        <div className="graph-controls">
+          <button className="g-btn" disabled={step === 0} onClick={() => { setStep(s => Math.max(0, s-1)); setPlaying(false); }}>◀</button>
+          <span className="g-step-lbl">{lbl}</span>
+          <button className="g-btn" disabled={step === total} onClick={() => { setStep(s => Math.min(total, s+1)); setPlaying(false); }}>▶</button>
+          <button className="g-btn play-btn" onClick={() => { if (step >= total) setStep(0); setPlaying(p => !p); }}>
+            {playing ? '⏸ Pause' : '▶ Play'}
+          </button>
+          <button className="g-btn" title="Reset" onClick={() => { setStep(0); setPlaying(false); }}>↺</button>
+          
+          <div style={{ marginLeft: 8 }}>
+            <SectionNavArrows prevId="calculator" nextId={total > 0 ? "step-1" : "step-final"} />
+          </div>
+        </div>
+      </div>
+      <div className="graph-slider-row">
+        <span className="g-slider-lbl">CFG</span>
+        <input type="range" className="g-slider" min={0} max={total} value={step}
+          onChange={e => { setStep(+e.target.value); setPlaying(false); }} />
+        <span className="g-slider-lbl">{allSteps[total-1]?.phase === 'gnf' ? 'GNF' : 'CNF'}</span>
+      </div>
+      <div id="graphContainer">
+        <div className="graph-canvas-overlay" />
+        <GrammarGraph productions={curProds} startSymbol={startSymbol} prevProductions={prevProds} stepInfo={stepInfo} />
+      </div>
+      <div className="graph-legend">
+        <div className="leg-item"><div className="leg-dot" style={{background:'#7c5cfc'}}></div>Non-terminal</div>
+        <div className="leg-item"><div className="leg-dot" style={{background:'#fc5c8a'}}></div>New NT</div>
+        <div className="leg-item"><div className="leg-dot" style={{background:'#5cfce8',borderRadius:2,width:14,height:8}}></div>Terminal</div>
+        <div className="leg-item"><div className="leg-dot" style={{background:'#fcc95c',outline:'2px solid #fcc95c',outlineOffset:3}}></div>Start</div>
+        <div className="leg-item"><div className="leg-line" style={{background:'#7c5cfc',height:2}}></div>NT→NT</div>
+        <div className="leg-item"><div className="leg-line" style={{borderTop:'2px dashed #5cfce8',height:0,width:18}}></div>NT→terminal</div>
+      </div>
+      <div className="bar-section">
+        <div className="bar-lbl">Productions per step</div>
+        <div className="bar-row">
+          {counts.map((d, i) => (
+            <div key={i} className="bar-col" onClick={() => setStep(i)} style={{ opacity: i === step ? 1 : 0.45, transition: 'opacity 0.2s' }}>
+              <div className="bar-n">{d.n}</div>
+              <div className="bar-fill" style={{ height: Math.max(3, (d.n/maxN)*52)+'px', background: d.col }} />
+              <div className="bar-s">{d.lbl}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function StepCard({ step, delay = 0, totalSteps }) {
+  const [expanded, setExpanded] = useState(true);
+  const c = COLORS[step.id] || '#7c5cfc';
+  const phaseBg = step.phase === 'gnf' ? 'rgba(92,252,232,0.06)' : 'rgba(124,92,252,0.06)';
+  return (
+    <div className="step-card" id={`step-${step.id}`} style={{ animationDelay: `${delay}ms`, borderTop: `2px solid ${c}` }}>
+      <div className="step-card-top">
+        <div className="step-card-left">
+          <div className="snum" style={{ background: c }}>{step.id}</div>
+          <div>
+            <div className="sname">{step.name}</div>
+            <div className="sdesc">{step.desc}</div>
+          </div>
+        </div>
+        <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginTop:4 }}>
+          <span style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:10, padding:'3px 8px', borderRadius:20, background: phaseBg, color: step.phase === 'gnf' ? 'var(--accent3)' : 'var(--accent)', textTransform:'uppercase', letterSpacing:1 }}>{step.phase}</span>
+          <div className={`sbadge${step.changed ? ' mod' : ' nomod'}`}>{step.changed ? '✓ Modified' : '— No change'}</div>
+          <button className="toggle-btn" onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</button>
+          
+          <div style={{ marginLeft: 8 }}>
+            <SectionNavArrows 
+              prevId={step.id === 1 ? 'graph-section' : `step-${step.id - 1}`} 
+              nextId={step.id === totalSteps ? 'step-final' : `step-${step.id + 1}`} 
+            />
+          </div>
+        </div>
+      </div>
+      <div className="step-explain" style={{ borderLeftColor: c }} dangerouslySetInnerHTML={{ __html: step.expl }} />
+      {expanded && <>
+        <div className="prods-lbl">Result Grammar ({countP(step.productions)} rules)</div>
+        <ProdsList productions={step.productions} newNTs={step.newNTs} />
+      </>}
+    </div>
+  );
+}
+
+function FinalPanel({ cnfResult, gnfResult, origGrammar, allSteps }) {
+  const [tab, setTab] = useState(cnfResult ? 'cnf' : gnfResult ? 'gnf' : 'stats');
+  const [copied, setCopied] = useState('');
+
+  const cnfNTs = cnfResult ? getAllNTs(cnfResult.finalProductions) : null;
+  const gnfNTs = gnfResult ? getAllNTs(gnfResult.finalProductions) : null;
+
+  function copyText(text, label) {
+    navigator.clipboard?.writeText(text).then(() => {
+      setCopied(label);
+      setTimeout(() => setCopied(''), 2000);
+    });
+  }
+
+  function downloadText(text, filename) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename; a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  return (
+    <div className="final-card" id="step-final">
+      <div className="final-header-bar">
+        {cnfResult && <button className={`ftab${tab === 'cnf' ? ' active' : ''}`} onClick={() => setTab('cnf')}>🎯 CNF Grammar</button>}
+        {gnfResult && <button className={`ftab${tab === 'gnf' ? ' active' : ''}`} onClick={() => setTab('gnf')}>🔮 GNF Grammar</button>}
+        <button className={`ftab${tab === 'stats' ? ' active' : ''}`} onClick={() => setTab('stats')}>📊 Statistics</button>
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: 28 }}>
+          <SectionNavArrows prevId={allSteps.length > 0 ? `step-${allSteps.length}` : 'graph-section'} nextId={null} />
+        </div>
+      </div>
+
+      {cnfResult && (
+        <div className={`ftab-content${tab === 'cnf' ? ' active' : ''}`}>
+          <div className="fstats">
+            <div className="fstat"><span className="fstat-val gold">{cnfNTs.size}</span><div className="fstat-lbl">Non-terminals</div></div>
+            <div className="fstat"><span className="fstat-val">{countP(cnfResult.finalProductions)}</span><div className="fstat-lbl">Productions</div></div>
+            <div className="fstat"><span className={`fstat-val${checkCNF(cnfResult.finalProductions) ? ' ok' : ''}`}>{checkCNF(cnfResult.finalProductions) ? '✓' : '⚠'}</span><div className="fstat-lbl">Valid CNF</div></div>
+          </div>
+          <div className="form-note"><strong>Chomsky Normal Form:</strong> Every production is A→BC (two non-terminals) or A→a (one terminal). Enables CYK parsing in O(n³) time.</div>
+          <ProdsList productions={cnfResult.finalProductions} newNTs={new Set()} />
+          <div className="export-bar">
+            <button className="export-btn export-btn-copy" onClick={() => copyText(productionsToText(cnfResult.finalProductions), 'cnf')}>
+              📋 {copied === 'cnf' ? 'Copied!' : 'Copy CNF'}
+            </button>
+            <button className="export-btn export-btn-plain" onClick={() => downloadText(productionsToText(cnfResult.finalProductions), 'grammar-cnf.txt')}>
+              ↓ Download .txt
+            </button>
+          </div>
+        </div>
+      )}
+
+      {gnfResult && (
+        <div className={`ftab-content${tab === 'gnf' ? ' active' : ''}`}>
+          <div className="fstats">
+            <div className="fstat"><span className="fstat-val gold">{gnfNTs.size}</span><div className="fstat-lbl">Non-terminals</div></div>
+            <div className="fstat"><span className="fstat-val">{countP(gnfResult.finalProductions)}</span><div className="fstat-lbl">Productions</div></div>
+            <div className="fstat"><span className={`fstat-val${checkGNF(gnfResult.finalProductions) ? ' ok' : ''}`}>{checkGNF(gnfResult.finalProductions) ? '✓' : '~'}</span><div className="fstat-lbl">GNF Form</div></div>
+          </div>
+          <div className="form-note" style={{ borderColor:'rgba(92,252,232,0.15)', background:'rgba(92,252,232,0.05)' }}>
+            <strong style={{ color:'var(--accent3)' }}>Greibach Normal Form:</strong> Every production starts with a terminal: A→aα. Eliminates all left recursion and simplifies pushdown automata construction.
+          </div>
+          <ProdsList productions={gnfResult.finalProductions} newNTs={new Set()} />
+          <div className="export-bar">
+            <button className="export-btn export-btn-copy" onClick={() => copyText(productionsToText(gnfResult.finalProductions), 'gnf')}>
+              📋 {copied === 'gnf' ? 'Copied!' : 'Copy GNF'}
+            </button>
+            <button className="export-btn export-btn-plain" onClick={() => downloadText(productionsToText(gnfResult.finalProductions), 'grammar-gnf.txt')}>
+              ↓ Download .txt
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className={`ftab-content${tab === 'stats' ? ' active' : ''}`}>
+        <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:12 }}>
+          {[
+            { title:'Original CFG', col:'#55556a', rows:[['Non-terminals',origGrammar.nonterminals.size],['Terminals',origGrammar.terminals.size],['Productions',countP(origGrammar.productions)],['Start Symbol',origGrammar.startSymbol]] },
+            cnfResult && { title:'After CNF', col:'#7c5cfc', rows:[['Non-terminals',cnfNTs.size],['Productions',countP(cnfResult.finalProductions)],['Conversion Steps',cnfResult.steps.length],['Valid CNF?',checkCNF(cnfResult.finalProductions)?'Yes ✓':'Partial']] },
+            gnfResult && { title:'After GNF', col:'#5cfce8', rows:[['Non-terminals',gnfNTs.size],['Productions',countP(gnfResult.finalProductions)],['Extra Steps',gnfResult.steps.length],['Left Recursive?','No ✓']] },
+          ].filter(Boolean).map((c, i) => (
+            <div key={i} style={{ background:'rgba(255,255,255,0.03)', border:`1px solid ${c.col}25`, borderRadius:14, padding:20 }}>
+              <div style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:11, color:c.col, textTransform:'uppercase', letterSpacing:2, marginBottom:14 }}>{c.title}</div>
+              {c.rows.map(([k, v]) => (
+                <div key={k} style={{ display:'flex', justifyContent:'space-between', gap:12, fontSize:13, marginTop:8 }}>
+                  <span style={{ color:'var(--text2)' }}>{k}</span>
+                  <span style={{ fontFamily:'"JetBrains Mono",monospace', color:c.col }}>{v}</span>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Particles() {
+  const containerRef = useRef(null);
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const c = containerRef.current;
+    for (let i = 0; i < 30; i++) {
+      const p = document.createElement('div');
+      p.className = 'particle';
+      p.style.cssText = `left:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-duration:${6+Math.random()*12}s;animation-delay:${Math.random()*8}s;background:${Math.random()>0.5?'#7c5cfc':Math.random()>0.5?'#5cfce8':'#fc5c8a'};`;
+      c.appendChild(p);
+    }
+    return () => { while (c.firstChild) c.removeChild(c.firstChild); };
+  }, []);
+  return <div className="particles" ref={containerRef} />;
+}
+
+function AboutSection() {
+  const cards = [
+    { icon:'📐', title:'Chomsky Normal Form (CNF)', desc:'Every production is A→BC or A→a. Required for CYK parsing algorithm, running in O(n³) — the gold standard for context-free parsing.', badge:'Binary Form', g:'linear-gradient(135deg,#7c5cfc,#fc5c8a)', bg:'rgba(124,92,252,0.1)' },
+    { icon:'🔀', title:'Greibach Normal Form (GNF)', desc:'Every production starts with a terminal: A→aα. Eliminates all left recursion and enables direct construction of equivalent pushdown automata.', badge:'Terminal-First', g:'linear-gradient(135deg,#5cfce8,#5ca8fc)', bg:'rgba(92,252,232,0.08)' },
+    { icon:'⚙️', title:'5-Step CNF Algorithm', desc:'New start → Eliminate ε-rules → Eliminate unit rules → Remove useless symbols → Binarize. Each step is shown with intermediate grammar states.', badge:'Systematic', g:'linear-gradient(135deg,#fcc95c,#fc5c8a)', bg:'rgba(252,201,92,0.08)' },
+    { icon:'🔗', title:'Interactive D3 Graph', desc:'Force-directed graph animating each transformation. Drag nodes, zoom in/out, and see newly added symbols highlighted in real time.', badge:'Live Viz', g:'linear-gradient(135deg,#5ca8fc,#7c5cfc)', bg:'rgba(92,168,252,0.08)' },
+    { icon:'🧩', title:'Step-by-Step Breakdown', desc:'Every intermediate grammar is shown with color-coded tokens. Expand/collapse steps and navigate via the sidebar.', badge:'Educational', g:'linear-gradient(135deg,#fc5c8a,#fcc95c)', bg:'rgba(252,92,138,0.08)' },
+    { icon:'📤', title:'Export Results', desc:'Copy the final CNF or GNF grammar to clipboard or download it as a .txt file. Perfect for assignment submissions and notes.', badge:'Export Ready', g:'linear-gradient(135deg,#5cfce8,#7c5cfc)', bg:'rgba(92,252,232,0.06)' },
+  ];
+  return (
+    <section className="about" id="about">
+      <div className="about-inner">
+        <div className="section-header-row">
+          <div>
+            <div className="section-label">What is this?</div>
+            <h2>Formal Grammar<br /><em>Transformation Engine</em></h2>
+          </div>
+          <SectionNavArrows prevId="hero" nextId="cheatsheet" />
+        </div>
+        <p style={{ color:'var(--text2)', fontSize:16, lineHeight:1.7, maxWidth:600 }}>
+          A pedagogical tool for Theory of Automata &amp; Formal Languages. Enter any Context-Free Grammar and watch it transform step-by-step into standardized normal forms.
+        </p>
+        <div className="about-grid">
+          {cards.map((c, i) => (
+            <div className="about-card" key={i} style={{ '--g': c.g }}>
+              <div className="card-icon" style={{ background: c.bg }}>{c.icon}</div>
+              <div className="card-title">{c.title}</div>
+              <div className="card-desc">{c.desc}</div>
+              <div className="card-badge" style={{ background: c.bg, color:'white', filter:'brightness(1.5)' }}>{c.badge}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function CheatSheetSection() {
+  const cnfSteps = [
+    { n: 1, name: 'New Start Symbol', desc: 'If S appears on any RHS, create S₀ → S and make S₀ the new start.', code: 'S₀ → S' },
+    { n: 2, name: 'Eliminate ε-Productions', desc: 'Find all nullable NTs. For each rule, add all variants that omit nullable symbols. Remove A→ε.', code: 'nullable: A if A→ε or A→Bα where B nullable' },
+    { n: 3, name: 'Eliminate Unit Productions', desc: 'Replace A→B with all productions reachable from B via unit chain. Transitive closure.', code: 'unit(A) = {B : A ⇒* B via unit rules}' },
+    { n: 4, name: 'Remove Useless Symbols', desc: 'Remove non-generating NTs (can\'t derive terminals). Then remove unreachable NTs.', code: 'generating + reachable = useful' },
+    { n: 5, name: 'Convert to Binary Form', desc: 'Replace terminals in mixed rules with proxy NTs (Tₐ→a). Binarize long rules A→B₁B₂...Bₙ.', code: 'A→B₁B₂B₃ becomes A→B₁X, X→B₂B₃' },
+  ];
+  const gnfSteps = [
+    { n: 6, name: 'Order Non-Terminals', desc: 'Assign a total ordering A₁ < A₂ < ... < Aₙ to all non-terminals. Start symbol is A₁.', code: 'A₁ = start symbol' },
+    { n: 7, name: 'Eliminate Left Recursion', desc: 'For each Aᵢ: substitute all Aⱼ (j<i) on the left. Then eliminate any immediate left recursion.', code: 'A→Aα|β becomes A→βA\', A\'→αA\'|α' },
+    { n: 8, name: 'Back-Substitution', desc: 'Work from Aₙ backward: substitute the first symbol of each rule until every rule starts with a terminal.', code: 'repeat until ∀A: A→aα' },
+  ];
+
+  return (
+    <section className="cheatsheet" id="cheatsheet">
+      <div className="cheatsheet-inner">
+        <div className="section-header-row">
+          <div>
+            <div className="section-label">Algorithm Reference</div>
+            <h2>How the Conversions Work</h2>
+          </div>
+          <SectionNavArrows prevId="about" nextId="calculator" />
+        </div>
+        <p style={{ color:'var(--text2)', fontSize:15, lineHeight:1.7, maxWidth:600, marginBottom:0 }}>
+          A concise reference for both algorithms. Use this alongside the step-by-step output below.
+        </p>
+        
+        <div className="algo-steps-grid">
+          <div className="algo-block">
+            <div className="algo-block-header">
+              <span className="algo-block-icon">📐</span>
+              <div>
+                <div className="algo-block-title">CFG → CNF</div>
+                <div className="algo-block-sub">5 Steps · Chomsky Normal Form</div>
+              </div>
+            </div>
+            {cnfSteps.map(s => (
+              <div className="algo-step-row" key={s.n}>
+                <div className="algo-step-num" style={{ background: COLORS[s.n] }}>{s.n}</div>
+                <div className="algo-step-body">
+                  <div className="algo-step-name">{s.name}</div>
+                  <div className="algo-step-desc">{s.desc}</div>
+                  <div className="algo-step-code">{s.code}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="algo-block">
+            <div className="algo-block-header">
+              <span className="algo-block-icon">🔮</span>
+              <div>
+                <div className="algo-block-title">CNF → GNF</div>
+                <div className="algo-block-sub">3 Steps · Greibach Normal Form</div>
+              </div>
+            </div>
+            {gnfSteps.map(s => (
+              <div className="algo-step-row" key={s.n}>
+                <div className="algo-step-num" style={{ background: COLORS[s.n] }}>{s.n}</div>
+                <div className="algo-step-body">
+                  <div className="algo-step-name">{s.name}</div>
+                  <div className="algo-step-desc">{s.desc}</div>
+                  <div className="algo-step-code">{s.code}</div>
+                </div>
+              </div>
+            ))}
+            <div className="algo-note">
+              <div className="algo-note-title">Note</div>
+              <div className="algo-note-desc">GNF conversion starts from CNF. Both preserve generated language.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function App() {
+  const [mode, setMode] = useState('cnf');
+  const [grammarText, setGrammarText] = useState(EXAMPLES.expr);
+  const [error, setError] = useState('');
+  const [validInfo, setValidInfo] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
+  const [activeSection, setActiveSection] = useState('hero');
+
+  const sectionIds = ['hero', 'about', 'cheatsheet', 'calculator', 'results'];
+  const sectionRefs = useRef({});
+
+  useEffect(() => {
+    initCursor();
+    initScrollProgress();
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
+          setActiveSection(entry.target.id);
+        }
+      }
+    }, { threshold: 0.25 });
+
+    sectionIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const scrollToSection = useCallback((id) => {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, []);
+
+  const allSteps = useMemo(() => {
+    if (!result) return [];
+    const s = [];
+    if (result.cnfResult) s.push(...result.cnfResult.steps);
+    if (result.gnfResult) s.push(...result.gnfResult.steps);
+    return s;
+  }, [result]);
+
+  const handleValidate = useCallback(() => {
+    const info = validateGrammarOnly(grammarText);
+    setValidInfo(info);
+    setError(info.ok ? '' : info.error);
+    if (!info.ok) setValidInfo(null);
+  }, [grammarText]);
+
+  const handleConvert = useCallback(() => {
+    setError(''); setValidInfo(null); setLoading(true);
+    setTimeout(() => {
+      try {
+        const grammar = parseGrammar(grammarText);
+        let cnfResult = null, gnfResult = null;
+        if (mode === 'cnf' || mode === 'both') cnfResult = toCNF(grammar);
+        if (mode === 'gnf' || mode === 'both') {
+          const base = cnfResult || toCNF(grammar);
+          gnfResult = toGNF(base);
+          if (!cnfResult) cnfResult = base;
+        }
+        setResult({ cnfResult, gnfResult, origGrammar: grammar });
+        setLoading(false);
+        setTimeout(() => scrollToSection('results'), 300);
+      } catch (e) {
+        setError(e.message); setLoading(false);
+      }
+    }, 600);
+  }, [grammarText, mode, scrollToSection]);
+
+  return (
+    <>
+      <StickyNav
+        activeSection={activeSection}
+        onNavClick={scrollToSection}
+        onConvertClick={() => scrollToSection('calculator')}
+      />
+
+      <section className="hero" id="hero">
+        <div className="hero-bg" />
+        <div className="hero-grid" />
+        <Particles />
+        <div className="hero-content">
+          <div className="hero-tag"><div className="tag-dot" />Theory of Automata &amp; Formal Languages</div>
+          <h1>
+            <span className="word-cfg">CFG</span>{' '}
+            <span className="word-to">to</span>{' '}
+            <span className="word-cnf">CNF</span>{' '}
+            <span className="amp">&amp;</span>{' '}
+            <span className="word-gnf">GNF</span>
+          </h1>
+          <p className="hero-desc">
+            Step-by-step transformation of Context-Free Grammars into Chomsky Normal Form and Greibach Normal Form with interactive visualization.
+          </p>
+          <p className="hero-sub">paste your grammar · watch it transform · understand every step</p>
+          <div className="hero-chips">
+            {['D3 Force Graph','Step-by-step Viz','ε-elimination','Unit rule removal','Left recursion elim','CNF & GNF','Export Results','Algorithm Cheat Sheet'].map(c => (
+              <div className="chip" key={c}><span>✦</span>{c}</div>
+            ))}
+          </div>
+          <div className="scroll-cta" onClick={() => scrollToSection('about')}>
+            <span className="scroll-cta-text">Explore</span>
+            <div className="scroll-arrow-container">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <AboutSection />
+
+      <CheatSheetSection />
+
+      <section className="calculator" id="calculator">
+        <div className="calc-inner">
+          <div style={{ position: 'absolute', right: 0, top: 0, zIndex: 10 }}>
+            <SectionNavArrows prevId="cheatsheet" nextId="results" />
+          </div>
+          
+          <div className="calc-header">
+            <div className="section-label" style={{ justifyContent: 'center' }}>Grammar Converter</div>
+            <h2>Enter Your Grammar</h2>
+            <p>Paste or type your CFG below. Use uppercase for non-terminals, → or -&gt; for arrows.</p>
+          </div>
+
+          <div className="mode-bar">
+            {[['cnf','→ CNF'],['gnf','→ GNF'],['both','→ Both']].map(([m, lbl]) => (
+              <button key={m} className={`mode-btn${mode === m ? ` active active-${m}` : ''}`} onClick={() => setMode(m)}>
+                {lbl}
+              </button>
+            ))}
+          </div>
+
+          <div className="input-card">
+            <div className="input-top">
+              <div className="input-title"><div className="live-dot" />Grammar Input</div>
+              <div className="examples-row">
+                {Object.entries({ expr:'∑ Expr', palindrome:'↔ Palindrome', balanced:'() Balanced', simple:'★ Simple', unit:'◎ Unit' }).map(([k, lbl]) => (
+                  <button key={k} className="ex-btn" onClick={() => { setGrammarText(EXAMPLES[k]); setError(''); setValidInfo(null); }}>{lbl}</button>
+                ))}
+              </div>
+            </div>
+            <textarea
+              className="grammar-ta"
+              value={grammarText}
+              onChange={e => { setGrammarText(e.target.value); setError(''); setValidInfo(null); }}
+              placeholder={`Enter grammar rules, one per line:\nS → A B | a\nA → a A | a\nB → b B | b`}
+            />
+            <div className="input-bottom">
+              <div className="hints-row">
+                <div className="hint"><span className="hint-k">Uppercase</span> = Non-terminals</div>
+                <div className="hint"><span className="hint-k">→ / -&gt;</span> = Arrow</div>
+                <div className="hint"><span className="hint-k">|</span> = Alternates</div>
+                <div className="hint"><span className="hint-k">ε / eps</span> = Epsilon</div>
+              </div>
+              <button className="validate-btn" onClick={handleValidate}>✓ Validate</button>
+            </div>
+          </div>
+
+          {validInfo && !error && (
+            <div className="valid-box visible">
+              <span>✓</span>
+              <span>Valid grammar — Start: <strong>{validInfo.start}</strong>, {validInfo.nts} NTs, {validInfo.ts} terminals, {validInfo.rules} rules</span>
+            </div>
+          )}
+          {error && <div className="error-box visible"><span>⚠</span><span>{error}</span></div>}
+
+          <div className="convert-wrap">
+            <button className="convert-btn" onClick={handleConvert} disabled={loading}>
+              {loading ? (
+                <><span style={{ animation:'spinSlow 1s linear infinite', display:'inline-block' }}>⚙</span> Processing…</>
+              ) : (
+                <><span className="btn-spark">⚡</span> Convert Grammar</>
+              )}
+            </button>
+            <div className={`loading-bar${loading ? ' visible' : ''}`}><div className="loading-fill" /></div>
+          </div>
+
+          {result && (
+            <div className="scroll-down-cue" onClick={() => scrollToSection('results')}>
+              <span className="sdc-text">View results</span>
+              <div className="sdc-arrow">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/>
+                </svg>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className="results-section" id="results">
+        <div className="results-inner">
+          {!result ? (
+            <div className="welcome-state">
+              <span className="wi">🧮</span>
+              <h3>Awaiting input</h3>
+              <p>Enter a grammar above and click Convert to see the step-by-step transformation.</p>
+            </div>
+          ) : (
+            <>
+              <div className="results-top">
+                <div className="results-h">Transformation Steps</div>
+                <div className="results-badge">✓ {result.cnfResult && result.gnfResult ? 'CNF + GNF' : result.cnfResult ? 'CNF' : 'GNF'} Complete</div>
+              </div>
+              <div className="results-layout">
+                <div className="steps-nav">
+                  <div className="nav-header">Steps ({allSteps.length})</div>
+                  {allSteps.map(step => (
+                    <div key={step.id} className="nav-item" onClick={() => document.getElementById(`step-${step.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })}>
+                      <div className="nav-num" style={{ background: COLORS[step.id] }}>{step.id}</div>
+                      <div className="nav-info">
+                        <div className="nav-name">{step.name}</div>
+                        <div className="nav-sub">{step.phase?.toUpperCase()} · {countP(step.productions)} rules</div>
+                      </div>
+                      <div className="nav-status">{step.changed ? '✓' : '—'}</div>
+                    </div>
+                  ))}
+                  <div style={{ padding:'16px 20px', borderTop:'1px solid var(--border)' }}>
+                    <div style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:10, textTransform:'uppercase', letterSpacing:2, color:'var(--text3)', marginBottom:10 }}>Summary</div>
+                    {[
+                      ['Original', countP(result.origGrammar.productions), '#55556a'],
+                      result.cnfResult && ['CNF', countP(result.cnfResult.finalProductions), '#7c5cfc'],
+                      result.gnfResult && ['GNF', countP(result.gnfResult.finalProductions), '#5cfce8'],
+                    ].filter(Boolean).map(([lbl, n, c]) => (
+                      <div key={lbl} style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginTop:6 }}>
+                        <span style={{ color:'var(--text2)' }}>{lbl}</span>
+                        <span style={{ fontFamily:'"JetBrains Mono",monospace', color:c }}>{n} rules</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ display:'flex', flexDirection:'column', gap:24 }}>
+                  <VizSection
+                    allSteps={allSteps}
+                    origGrammar={result.origGrammar}
+                    startSymbol={result.cnfResult?.startSymbol || result.origGrammar.startSymbol}
+                  />
+                  {allSteps.map((step, i) => (
+                    <StepCard key={step.id} step={step} delay={i * 80} totalSteps={allSteps.length} />
+                  ))}
+                  <FinalPanel
+                    cnfResult={result.cnfResult}
+                    gnfResult={result.gnfResult}
+                    origGrammar={result.origGrammar}
+                    allSteps={allSteps}
+                  />
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </section>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
