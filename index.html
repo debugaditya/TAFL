@@ -1083,6 +1083,7 @@ const COLORS = {
 };
 
 const EXAMPLES = {
+  testCase: `S → A B | b\nA → a | ε\nB → b B | b`,
   expr:`S → S + T | T\nT → T * F | F\nF → ( S ) | a`,
   palindrome:`S → a S a | b S b | a | b | ε`,
   balanced:`S → ( S ) | S S | ε`,
@@ -1688,7 +1689,7 @@ function CheatSheetSection() {
 
 function App() {
   const [mode, setMode] = useState('cnf');
-  const [grammarText, setGrammarText] = useState(EXAMPLES.expr);
+  const [grammarText, setGrammarText] = useState(EXAMPLES.testCase);
   const [error, setError] = useState('');
   const [validInfo, setValidInfo] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -1828,7 +1829,7 @@ function App() {
             <div className="input-top">
               <div className="input-title"><div className="live-dot" />Grammar Input</div>
               <div className="examples-row">
-                {Object.entries({ expr:'∑ Expr', palindrome:'↔ Palindrome', balanced:'() Balanced', simple:'★ Simple', unit:'◎ Unit' }).map(([k, lbl]) => (
+                {Object.entries({ testCase:'📝 Image Test', expr:'∑ Expr', palindrome:'↔ Palindrome', balanced:'() Balanced', simple:'★ Simple' }).map(([k, lbl]) => (
                   <button key={k} className="ex-btn" onClick={() => { setGrammarText(EXAMPLES[k]); setError(''); setValidInfo(null); }}>{lbl}</button>
                 ))}
               </div>
