@@ -123,7 +123,6 @@ body::after {
 .nav-link:hover::after { left: 16px; right: 16px; }
 .nav-link.active { color: var(--text); background: rgba(124,92,252,0.08); }
 .nav-link.active::after { left: 16px; right: 16px; background: var(--accent); }
-
 .nav-link-icon { font-size: 14px; }
 
 .nav-cta {
@@ -145,7 +144,6 @@ body::after {
   .sticky-nav { padding: 0 20px; }
 }
 
-/* Offset for ID links */
 section { scroll-margin-top: var(--nav-h); }
 .step-card, .graph-card, .final-card {
   scroll-margin-top: calc(var(--nav-h) + 24px);
@@ -153,7 +151,6 @@ section { scroll-margin-top: var(--nav-h); }
 
 section { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
-/* Nav Arrows Styles */
 .section-nav-arrows {
   display: flex; gap: 6px; align-items: center;
 }
@@ -167,7 +164,6 @@ section { position: relative; display: flex; flex-direction: column; align-items
   background: rgba(124,92,252,0.1); color: var(--accent); border-color: var(--accent); transform: translateY(-2px);
 }
 .nav-arrow-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-.arrow-absolute { position: absolute; top: 0; right: 0; z-index: 10; }
 
 /* HERO */
 .hero {
@@ -478,6 +474,7 @@ section { position: relative; display: flex; flex-direction: column; align-items
 .bar-n { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--text3); }
 .bar-s { font-family: 'JetBrains Mono', monospace; font-size: 8px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; text-align: center; }
 
+/* ===== STEP CARD — REDESIGNED ===== */
 .step-card { background: var(--surface); border: 1px solid var(--border); border-radius: 24px; overflow: hidden; animation: cardIn 0.5s cubic-bezier(0.4,0,0.2,1) both; position: relative; }
 @keyframes cardIn { from{opacity:0;transform:translateY(24px)} to{opacity:1;transform:none} }
 .step-card-top { padding: 20px 24px 0; display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
@@ -489,8 +486,119 @@ section { position: relative; display: flex; flex-direction: column; align-items
 .sbadge { font-family: 'JetBrains Mono', monospace; font-size: 11px; padding: 4px 12px; border-radius: 20px; }
 .sbadge.mod { background: rgba(92,252,232,0.1); color: var(--accent3); border: 1px solid rgba(92,252,232,0.2); }
 .sbadge.nomod { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+
+/* Top-right controls row */
+.step-controls-row { display: flex; align-items: center; gap: 8px; flex-shrink: 0; margin-top: 4px; }
+
+/* Explain toggle button — the main new element */
+.explain-toggle-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; border-radius: 10px;
+  border: 1px solid rgba(252,201,92,0.25);
+  background: rgba(252,201,92,0.06);
+  color: var(--accent4); font-family: 'Outfit', sans-serif;
+  font-size: 12px; font-weight: 700; cursor: pointer;
+  transition: all 0.2s; white-space: nowrap;
+}
+.explain-toggle-btn:hover { background: rgba(252,201,92,0.12); border-color: var(--accent4); }
+.explain-toggle-btn.open { background: rgba(252,201,92,0.14); border-color: var(--accent4); }
+.explain-icon { font-size: 13px; transition: transform 0.3s ease; }
+.explain-icon.rotated { transform: rotate(180deg); }
+
 .toggle-btn { background: none; border: 1px solid var(--border); border-radius: 8px; width: 32px; height: 32px; cursor: pointer; color: var(--text3); font-size: 13px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
 .toggle-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(124,92,252,0.08); }
+
+/* ===== EXPLANATION PANEL ===== */
+.step-explanation-panel {
+  margin: 0 24px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid rgba(252,201,92,0.15);
+  background: rgba(252,201,92,0.04);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+  max-height: 0;
+  opacity: 0;
+}
+.step-explanation-panel.open {
+  max-height: 800px;
+  opacity: 1;
+  margin-top: 16px;
+  margin-bottom: 4px;
+}
+.explanation-header {
+  padding: 12px 18px 8px;
+  display: flex; align-items: center; gap: 8px;
+  border-bottom: 1px solid rgba(252,201,92,0.1);
+}
+.explanation-header-icon { font-size: 14px; }
+.explanation-header-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 2px; color: var(--accent4);
+}
+.explanation-body { padding: 14px 18px 16px; }
+
+/* WHY box */
+.expl-why {
+  font-size: 13.5px; color: var(--text); line-height: 1.8; margin-bottom: 12px;
+}
+.expl-why code {
+  font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent3);
+  background: rgba(92,252,232,0.08); padding: 1px 7px; border-radius: 4px;
+  border: 1px solid rgba(92,252,232,0.15);
+}
+.expl-why strong { color: var(--accent4); font-weight: 700; }
+
+/* DETAIL BLOCKS within explanation */
+.expl-details { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.expl-detail-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  background: rgba(255,255,255,0.03); border: 1px solid var(--border);
+  border-radius: 8px; padding: 10px 14px;
+}
+.expl-detail-label {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px;
+  text-transform: uppercase; letter-spacing: 1px; min-width: 80px;
+  padding-top: 2px; flex-shrink: 0;
+}
+.expl-detail-label.removed { color: var(--accent2); }
+.expl-detail-label.added { color: var(--accent3); }
+.expl-detail-label.modified { color: var(--accent4); }
+.expl-detail-label.neutral { color: var(--text3); }
+.expl-detail-value { font-size: 13px; color: var(--text2); line-height: 1.6; }
+.expl-detail-value code {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text);
+  background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px;
+}
+
+/* WHAT CHANGED pills */
+.expl-changes-title {
+  font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase;
+  letter-spacing: 2px; color: var(--text3); margin: 12px 0 8px;
+}
+.expl-changes-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.expl-change-pill {
+  font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  padding: 4px 10px; border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+}
+.expl-change-pill.removed { background: rgba(252,92,138,0.08); color: var(--accent2); border: 1px solid rgba(252,92,138,0.2); }
+.expl-change-pill.added { background: rgba(92,252,232,0.08); color: var(--accent3); border: 1px solid rgba(92,252,232,0.2); }
+.expl-change-pill.neutral { background: rgba(255,255,255,0.04); color: var(--text3); border: 1px solid var(--border); }
+.pill-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.pill-dot.removed { background: var(--accent2); }
+.pill-dot.added { background: var(--accent3); }
+
+/* Algo box inside explanation */
+.expl-algo-box {
+  margin-top: 10px; padding: 10px 14px;
+  background: rgba(124,92,252,0.06); border: 1px solid rgba(124,92,252,0.15); border-radius: 8px;
+  font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); line-height: 1.9;
+}
+.expl-algo-title { font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); margin-bottom: 6px; }
+
+/* step body separator */
+.step-body-divider { height: 1px; background: var(--border); margin: 16px 0 0; }
+
 .step-explain { margin: 16px 24px; padding: 14px 18px; background: var(--bg3); border-radius: 10px; border-left: 3px solid; font-size: 13.5px; color: var(--text2); line-height: 1.75; }
 .step-explain code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; }
 .prods-lbl { padding: 0 24px 8px; font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: var(--text3); }
@@ -513,7 +621,7 @@ section { position: relative; display: flex; flex-direction: column; align-items
 .tok-new::after { content:'NEW'; position:absolute; top:-9px; right:-3px; font-size:7px; background:var(--accent2); color:white; padding:1px 3px; border-radius:3px; }
 
 .final-card { background: var(--bg2); border: 1px solid var(--border2); border-radius: 24px; overflow: hidden; position: relative; }
-.final-header-bar { padding: 0 28px; display: flex; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0; }
+.final-header-bar { padding: 0 28px; display: flex; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0; align-items: center; }
 .ftab { padding: 16px 20px; background: none; border: none; font-family: 'Outfit', sans-serif; font-size: 14px; font-weight: 700; cursor: pointer; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.2s; white-space: nowrap; }
 .ftab.active { color: var(--text); border-bottom-color: var(--accent4); }
 .ftab-content { padding: 28px; display: none; }
@@ -548,6 +656,7 @@ section { position: relative; display: flex; flex-direction: column; align-items
   .steps-nav { position: static; }
   .bar-s { display: none; }
   .algo-steps-grid { grid-template-columns: 1fr; }
+  .step-controls-row { flex-wrap: wrap; }
 }
 </style>
 </head>
@@ -589,7 +698,6 @@ function initScrollProgress() {
   update();
 }
 
-// Side-by-side arrows to jump between sections
 function SectionNavArrows({ prevId, nextId, className }) {
   const nav = (id) => {
     if (!id) return;
@@ -597,25 +705,11 @@ function SectionNavArrows({ prevId, nextId, className }) {
   };
   return (
     <div className={`section-nav-arrows ${className || ''}`}>
-      <button 
-        className="nav-arrow-btn" 
-        onClick={(e) => { e.stopPropagation(); nav(prevId); }} 
-        disabled={!prevId} 
-        title="Previous Section"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="18 15 12 9 6 15"></polyline>
-        </svg>
+      <button className="nav-arrow-btn" onClick={(e) => { e.stopPropagation(); nav(prevId); }} disabled={!prevId} title="Previous Section">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
       </button>
-      <button 
-        className="nav-arrow-btn" 
-        onClick={(e) => { e.stopPropagation(); nav(nextId); }} 
-        disabled={!nextId} 
-        title="Next Section"
-      >
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          <polyline points="6 9 12 15 18 9"></polyline>
-        </svg>
+      <button className="nav-arrow-btn" onClick={(e) => { e.stopPropagation(); nav(nextId); }} disabled={!nextId} title="Next Section">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
       </button>
     </div>
   );
@@ -635,7 +729,6 @@ function parseGrammar(text) {
     if (!/^[A-Z][A-Z0-9'_]*$/.test(lhs)) throw new Error(`LHS must start with uppercase letter: "${lhs}"`);
     if (!startSymbol) startSymbol = lhs;
     if (!productions[lhs]) productions[lhs] = [];
-
     const rhs = line.slice(ai + al);
     for (const alt of rhs.split('|')) {
       const tr = alt.trim();
@@ -660,24 +753,18 @@ function parseGrammar(text) {
   }
 
   if (!startSymbol) throw new Error('No start symbol found.');
-
   const defined = new Set(Object.keys(productions));
   for (const [lhs, ps] of Object.entries(productions)) {
-    for (const p of ps) {
-      for (const s of p) {
-        if (s !== 'ε' && /^[A-Z]/.test(s) && !defined.has(s)) {
-          throw new Error(`Non-terminal "${s}" used in rule "${lhs}" but never defined.`);
-        }
-      }
+    for (const p of ps) for (const s of p) {
+      if (s !== 'ε' && /^[A-Z]/.test(s) && !defined.has(s))
+        throw new Error(`Non-terminal "${s}" used in rule "${lhs}" but never defined.`);
     }
   }
-
   const nonterminals = new Set(Object.keys(productions));
   const terminals = new Set();
   for (const ps of Object.values(productions))
     for (const p of ps) for (const s of p)
       if (s !== 'ε' && !/^[A-Z]/.test(s)) terminals.add(s);
-
   return { productions, startSymbol, nonterminals, terminals };
 }
 
@@ -724,6 +811,213 @@ function validateGrammarOnly(text) {
   }
 }
 
+// =================== DYNAMIC EXPLANATION GENERATOR ===================
+function generateStepExplanation(step, prevProductions, origGrammar) {
+  const p = step.productions;
+  const prev = prevProductions || origGrammar.productions;
+  const nts = getAllNTs(p);
+  const prevNTs = getAllNTs(prev);
+
+  const addedNTs = [...nts].filter(x => !prevNTs.has(x));
+  const removedNTs = [...prevNTs].filter(x => !nts.has(x));
+
+  // Count epsilon rules in previous
+  const prevEpsRules = [];
+  for (const [lhs, ps] of Object.entries(prev))
+    for (const prod of ps)
+      if (prod.length === 1 && prod[0] === 'ε') prevEpsRules.push(lhs);
+
+  // Count unit rules in previous
+  const prevUnitRules = [];
+  for (const [lhs, ps] of Object.entries(prev))
+    for (const prod of ps)
+      if (prod.length === 1 && /^[A-Z]/.test(prod[0]) && !prevEpsRules.includes(prod[0]))
+        prevUnitRules.push(`${lhs}→${prod[0]}`);
+
+  // Find long rules binarized
+  const longRulesBefore = [];
+  for (const [lhs, ps] of Object.entries(prev))
+    for (const prod of ps)
+      if (prod.length >= 3) longRulesBefore.push(`${lhs}→${prod.join(' ')}`);
+
+  // Find left-recursive rules in prev
+  const leftRecRules = [];
+  for (const [lhs, ps] of Object.entries(prev))
+    for (const prod of ps)
+      if (prod[0] === lhs) leftRecRules.push(`${lhs}→${prod.join(' ')}`);
+
+  // Count terminal-only rules in previous (for proxy step)
+  const mixedRules = [];
+  for (const [lhs, ps] of Object.entries(prev))
+    for (const prod of ps)
+      if (prod.length >= 2 && prod.some(s => !/^[A-Z]/.test(s) && s !== 'ε') && prod.some(s => /^[A-Z]/.test(s)))
+        mixedRules.push(`${lhs}→${prod.join(' ')}`);
+
+  const rulesAdded = countP(p) - countP(prev);
+  const rulesChange = rulesAdded >= 0 ? `+${rulesAdded}` : `${rulesAdded}`;
+
+  switch (step.id) {
+    case 1: {
+      const changed = step.changed;
+      const newS = addedNTs[0];
+      const origStart = origGrammar.startSymbol;
+      return {
+        why: changed
+          ? `The original start symbol <strong>${origStart}</strong> appeared on the right-hand side of some rule. CNF requires the start symbol to never appear on any RHS, because the algorithm may add new rules that reference it. To fix this, we introduce a brand-new non-terminal <strong>${newS}</strong> and make it the new start.`
+          : `The start symbol <strong>${origStart}</strong> does not appear on any right-hand side, so no new start is needed. The grammar is already safe on this front.`,
+        details: changed ? [
+          { label: 'Problem', type: 'neutral', value: `<code>${origStart}</code> was used inside a rule's RHS — violates CNF's start-symbol restriction` },
+          { label: 'Fix applied', type: 'added', value: `Added <code>${newS} → ${origStart}</code> and set <code>${newS}</code> as the new start symbol` },
+          { label: 'Why it works', type: 'neutral', value: `The new rule generates exactly the same language. <code>${newS}</code> is fresh and will never appear on a RHS` },
+        ] : [
+          { label: 'Check result', type: 'added', value: `<code>${origStart}</code> is safe — it never appears on any RHS. No action needed.` },
+        ],
+        changes: changed ? [
+          { type: 'added', text: `New start: ${newS}` },
+          { type: 'added', text: `Rule: ${newS}→${origStart}` },
+        ] : [{ type: 'neutral', text: 'No change' }],
+        algo: `For each rule X → α: if start symbol ∈ α, create S₀ → S and make S₀ the new start.`
+      };
+    }
+    case 2: {
+      const nullables = step.expl.match(/\{([^}]+)\}/)?.[1]?.split(', ') || [];
+      return {
+        why: nullables.length > 0
+          ? `We found <strong>${nullables.length} nullable non-terminal${nullables.length > 1 ? 's' : ''}</strong> — ${nullables.map(n => `<strong>${n}</strong>`).join(', ')} — which can each derive ε (the empty string). CNF doesn't allow ε-productions (except possibly at the start). So we must eliminate them carefully: for every rule that contains a nullable symbol, we add a new variant of that rule where the nullable symbol is omitted, covering all possible combinations.`
+          : `No non-terminals can derive ε (the empty string), so there are no ε-productions to eliminate. This step is a no-op for your grammar.`,
+        details: nullables.length > 0 ? [
+          { label: 'Nullable NTs', type: 'removed', value: nullables.map(n => `<code>${n}</code>`).join(', ') + ` — each can derive ε` },
+          { label: 'What we did', type: 'modified', value: `For every rule containing a nullable symbol, added all variants with that symbol optionally removed` },
+          { label: 'After', type: 'added', value: `All <code>A → ε</code> rules removed (except possibly <code>${origGrammar.startSymbol} → ε</code> if language includes ε)` },
+        ] : [
+          { label: 'No nullables', type: 'neutral', value: `No rule can derive the empty string — nothing to eliminate` },
+        ],
+        changes: nullables.length > 0 ? [
+          { type: 'removed', text: `${prevEpsRules.length} ε-rule${prevEpsRules.length !== 1 ? 's' : ''} removed` },
+          { type: 'added', text: `Combination variants added` },
+          { type: 'neutral', text: `Nullable: {${nullables.join(', ')}}` },
+        ] : [{ type: 'neutral', text: 'No nullable NTs found' }],
+        algo: `1. Find nullable(A): A→ε directly, or A→BC where B,C both nullable\n2. For each rule X→α containing nullable, add X→α' for each subset of nullables removed\n3. Remove all A→ε (except start if ε ∈ L(G))`
+      };
+    }
+    case 3: {
+      const unitCount = prevUnitRules.length;
+      return {
+        why: unitCount > 0
+          ? `A <strong>unit production</strong> is a rule of the form <code>A → B</code> where B is a single non-terminal. CNF bans these because they just redirect parsing without doing real work. We replace each unit rule by "inlining" — wherever <code>A → B</code> exists, we copy all of B's actual productions directly into A, following the full transitive chain.`
+          : `Your grammar has no unit productions (single non-terminal on the RHS), so this step makes no changes.`,
+        details: unitCount > 0 ? [
+          { label: 'Found', type: 'removed', value: `${unitCount} unit rule${unitCount !== 1 ? 's' : ''}: ${prevUnitRules.slice(0,4).map(r => `<code>${r}</code>`).join(', ')}${prevUnitRules.length > 4 ? '...' : ''}` },
+          { label: 'Method', type: 'modified', value: `Computed transitive closure: if A→*B via unit chain, copy all non-unit productions of B into A` },
+          { label: 'Result', type: 'added', value: `${unitCount} unit rule${unitCount !== 1 ? 's' : ''} eliminated. All rules now produce terminals or multiple non-terminals` },
+        ] : [
+          { label: 'No unit rules', type: 'neutral', value: `No A→B rules found where B is a single non-terminal` },
+        ],
+        changes: unitCount > 0 ? [
+          { type: 'removed', text: `${unitCount} unit rule${unitCount !== 1 ? 's' : ''} removed` },
+          { type: 'added', text: `Productions inlined from unit chain targets` },
+        ] : [{ type: 'neutral', text: 'No unit productions' }],
+        algo: `unit(A) = {B | A ⇒* B using only unit rules}\nFor each A: add all non-unit productions of every B ∈ unit(A)\nThen remove all unit productions A→B`
+      };
+    }
+    case 4: {
+      const ngc = parseInt(step.expl.match(/Non-generating removed: (\d+)/)?.[1] || '0');
+      const nrc = parseInt(step.expl.match(/Unreachable removed: (\d+)/)?.[1] || '0');
+      return {
+        why: ngc + nrc > 0
+          ? `After earlier steps, some non-terminals may have become <strong>useless</strong> — either they can never produce a string of terminals ("non-generating"), or they can never be reached from the start symbol ("unreachable"). Keeping them would bloat the grammar without affecting the language. We remove them in two passes.`
+          : `Every non-terminal in your grammar can both generate terminal strings and is reachable from the start symbol. No symbols to remove.`,
+        details: [
+          ngc > 0 && { label: 'Non-generating', type: 'removed', value: `${ngc} symbol${ngc !== 1 ? 's' : ''} removed — these could never derive a string of terminals` },
+          nrc > 0 && { label: 'Unreachable', type: 'removed', value: `${nrc} symbol${nrc !== 1 ? 's' : ''} removed — these were never reachable from the start symbol <code>${origGrammar.startSymbol}</code>` },
+          { label: 'Pass order', type: 'neutral', value: `Non-generating pass first, then reachability pass — order matters for correctness` },
+          ngc + nrc === 0 && { label: 'Clean grammar', type: 'added', value: `All symbols are generating and reachable — grammar is minimal` },
+        ].filter(Boolean),
+        changes: ngc + nrc > 0 ? [
+          ngc > 0 && { type: 'removed', text: `${ngc} non-generating NT${ngc !== 1 ? 's' : ''}` },
+          nrc > 0 && { type: 'removed', text: `${nrc} unreachable NT${nrc !== 1 ? 's' : ''}` },
+        ].filter(Boolean) : [{ type: 'neutral', text: 'No useless symbols' }],
+        algo: `Pass 1 (generating): A is generating if A→w where w∈Σ*, or A→BC where B,C generating\nPass 2 (reachable): A is reachable if it appears in derivation from start\nRemove all non-generating, then all unreachable`
+      };
+    }
+    case 5: {
+      const proxyNTs = addedNTs.filter(n => n.startsWith('T'));
+      const binaryNTs = addedNTs.filter(n => n.startsWith('B') || (!n.startsWith('T') && !n.startsWith('S')));
+      return {
+        why: `This is the final CNF conversion step. Two problems remain: (1) rules with <strong>3+ symbols</strong> need to be broken into binary rules (A→BC is the max), and (2) <strong>terminals mixed with non-terminals</strong> in longer rules (e.g. <code>A → a B</code>) must be replaced by proxy non-terminals. After this step, every rule is either <code>A → BC</code> or <code>A → a</code>.`,
+        details: [
+          mixedRules.length > 0 && { label: 'Mixed rules', type: 'removed', value: `${mixedRules.length} rule${mixedRules.length !== 1 ? 's' : ''} had terminals mixed with NTs: ${mixedRules.slice(0,3).map(r => `<code>${r}</code>`).join(', ')}${mixedRules.length > 3 ? '...' : ''}` },
+          proxyNTs.length > 0 && { label: 'Proxies added', type: 'added', value: `${proxyNTs.length} terminal-proxy NT${proxyNTs.length !== 1 ? 's' : ''} introduced: ${proxyNTs.map(n => `<code>${n}</code>`).join(', ')} — each wraps one terminal` },
+          longRulesBefore.length > 0 && { label: 'Long rules', type: 'removed', value: `${longRulesBefore.length} rule${longRulesBefore.length !== 1 ? 's' : ''} had 3+ symbols: ${longRulesBefore.slice(0,2).map(r => `<code>${r}</code>`).join(', ')}${longRulesBefore.length > 2 ? '...' : ''}` },
+          binaryNTs.length > 0 && { label: 'Binarized', type: 'added', value: `${binaryNTs.length} helper NT${binaryNTs.length !== 1 ? 's' : ''} added to split long rules into binary chains` },
+          { label: 'Final state', type: 'added', value: `Grammar is now in full CNF: every rule is A→BC or A→a` },
+        ].filter(Boolean),
+        changes: [
+          proxyNTs.length > 0 && { type: 'added', text: `${proxyNTs.length} proxy NT${proxyNTs.length !== 1 ? 's' : ''} (T...)` },
+          binaryNTs.length > 0 && { type: 'added', text: `${binaryNTs.length} binary NT${binaryNTs.length !== 1 ? 's' : ''} (B...)` },
+          { type: 'added', text: `${rulesChange} rules net` },
+        ].filter(Boolean),
+        algo: `For A→X₁X₂...Xₙ (n≥3):\n  Replace each terminal Xᵢ with proxy Tₓ→Xᵢ\n  Binarize: A→X₁Y₁, Y₁→X₂Y₂, ..., Yₙ₋₂→Xₙ₋₁Xₙ`
+      };
+    }
+    case 6: {
+      const order = Object.keys(p).map((n, i) => `A${i+1}=${n}`).join(', ');
+      return {
+        why: `GNF conversion uses the <strong>Paull's algorithm</strong>, which requires non-terminals to have a strict linear ordering. We assign an order A₁ < A₂ < ... < Aₙ (start symbol is A₁). This ordering is essential for the next step: we'll process each Aᵢ and ensure no Aᵢ rule starts with any Aⱼ where j ≥ i — which is the condition for eliminating left recursion systematically.`,
+        details: [
+          { label: 'Order assigned', type: 'added', value: `${Object.keys(p).length} non-terminals ordered. Start symbol <code>${step.productions ? Object.keys(p)[0] : '?'}</code> is first (A₁)` },
+          { label: 'Why ordering', type: 'neutral', value: `Paull's algorithm processes Aᵢ by substituting all Aⱼ (j < i) first. This creates a "staircase" structure that guarantees termination` },
+        ],
+        changes: [{ type: 'neutral', text: `No grammar rules changed — only ordering established` }],
+        algo: `Assign indices 1..n to all NTs\nA₁ = start symbol\nThis order used in Step 7 to guarantee left-recursion elimination terminates`
+      };
+    }
+    case 7: {
+      const primeNTs = [...(step.newNTs || [])];
+      const hasRec = primeNTs.length > 0;
+      return {
+        why: hasRec
+          ? `<strong>Left recursion</strong> is when a rule has the form <code>A → A α</code> (the NT starts its own expansion). GNF requires every rule to start with a terminal, which left recursion directly blocks. We eliminate it using Paull's algorithm: for each Aᵢ, substitute any Aⱼ (j < i) on its left, then apply the standard left-recursion removal, introducing <strong>prime variables</strong> (${primeNTs.map(n => `<code>${n}</code>`).join(', ')}).`
+          : `No left recursion was found in this grammar — every rule's first symbol is either a terminal or a higher-ordered non-terminal. This step makes no changes.`,
+        details: hasRec ? [
+          { label: 'Left-recursive', type: 'removed', value: `Found rules of form A→Aα. These block GNF since they can never start with a terminal directly` },
+          { label: 'Method', type: 'modified', value: `Applied: if A→Aα|β, replace with A→β | βA′ and A′→α | αA′` },
+          { label: 'Introduced', type: 'added', value: `Prime variable${primeNTs.length !== 1 ? 's' : ''}: ${primeNTs.map(n => `<code>${n}</code>`).join(', ')}. These handle the "tail" continuation` },
+          { label: 'Substitutions', type: 'modified', value: `Also substituted lower-index NTs (Aⱼ where j < i) on the left of each Aᵢ's rules before removal` },
+        ] : [
+          { label: 'No left recursion', type: 'neutral', value: `All rules either start with a terminal or a higher-indexed NT — Paull's algorithm found nothing to fix` },
+        ],
+        changes: hasRec ? [
+          { type: 'removed', text: `Left-recursive rules removed` },
+          { type: 'added', text: `${primeNTs.length} prime NT${primeNTs.length !== 1 ? 's' : ''}: ${primeNTs.join(', ')}` },
+        ] : [{ type: 'neutral', text: 'No left recursion found' }],
+        algo: `For i = 1 to n:\n  For j = 1 to i-1:\n    Replace Aᵢ→Aⱼγ with Aᵢ→δγ for each Aⱼ→δ\n  If Aᵢ→Aᵢα (immediate left rec):\n    Introduce Aᵢ′, set Aᵢ→β|βAᵢ′, Aᵢ′→α|αAᵢ′`
+      };
+    }
+    case 8: {
+      const prevNTCount = Object.keys(prev).length;
+      const ntCount = Object.keys(p).length;
+      return {
+        why: `After left-recursion removal, most rules still start with a non-terminal (just not a left-recursive one). GNF demands every rule starts with a <strong>terminal</strong>. We fix this by <strong>back-substitution</strong>: for every rule <code>Aᵢ → Aⱼ α</code> where Aⱼ starts its rules with a terminal, we replace <code>Aⱼ</code> with each of its productions, propagating terminals upward. We repeat this until the entire grammar is in GNF.`,
+        details: [
+          { label: 'Method', type: 'modified', value: `Iterated substitution: if A→Bα and B→aβ, replace with A→aβα. Repeat until all rules start with a terminal` },
+          { label: 'Passes needed', type: 'neutral', value: `${step.expl.match(/After (\d+) pass/)?.[1] || '?'} substitution pass${parseInt(step.expl.match(/After (\d+) pass/)?.[1] || '1') !== 1 ? 'es' : ''} to fully propagate terminals` },
+          { label: 'Result', type: 'added', value: `All ${countP(p)} rules now have form A → a α where a ∈ Σ (terminal) and α ∈ NT* (zero or more NTs)` },
+        ],
+        changes: [
+          { type: 'added', text: `Full GNF achieved` },
+          { type: 'neutral', text: `${rulesChange} rules net` },
+          { type: 'neutral', text: `${ntCount} NTs total` },
+        ],
+        algo: `Repeat until stable:\n  For each A→Bα where B is NT:\n    For each B→aβ:\n      Add A→aβα\n  Remove old A→Bα`
+      };
+    }
+    default:
+      return null;
+  }
+}
+
+// =================== CNF/GNF ALGORITHMS ===================
 function toCNF(grammar) {
   const steps = [];
   let { productions, startSymbol, nonterminals, terminals } = grammar;
@@ -751,9 +1045,7 @@ function toCNF(grammar) {
     steps.push({
       id: 1, name: 'New Start Symbol', phase: 'cnf',
       desc: 'Ensure start symbol does not appear on any RHS.',
-      expl: ns
-        ? `Introduced <code>${ns} → ${ps}</code> since <code>${ps}</code> appeared on a RHS.`
-        : `<code>${ps}</code> never appears on a RHS — no change.`,
+      expl: ns ? `Introduced <code>${ns} → ${ps}</code> since <code>${ps}</code> appeared on a RHS.` : `<code>${ps}</code> never appears on a RHS — no change.`,
       productions: cloneP(productions), changed: !!ns, newNTs: ns ? new Set([ns]) : new Set()
     });
   }
@@ -765,13 +1057,11 @@ function toCNF(grammar) {
       ch = false;
       for (const [nt, ps] of Object.entries(productions)) {
         if (nullable.has(nt)) continue;
-        if (ps.some(p => p.length === 1 && p[0] === 'ε') ||
-            ps.some(p => p.every(s => nullable.has(s)))) {
+        if (ps.some(p => p.length === 1 && p[0] === 'ε') || ps.some(p => p.every(s => nullable.has(s)))) {
           nullable.add(nt); ch = true;
         }
       }
     }
-
     for (const [nt, ps] of Object.entries(productions)) {
       const nm = new Map();
       for (const p of ps) {
@@ -785,30 +1075,22 @@ function toCNF(grammar) {
       }
       productions[nt] = [...nm.values()];
     }
-
     for (const [nt, ps] of Object.entries(productions)) {
       productions[nt] = ps.filter(p => !(p.length === 1 && p[0] === 'ε'));
       if (!productions[nt].length) delete productions[nt];
     }
-
     if (nullable.has(startSymbol)) {
       if (!productions[startSymbol]) productions[startSymbol] = [];
-      if (!productions[startSymbol].some(p => p.length === 1 && p[0] === 'ε')) {
-        productions[startSymbol].push(['ε']);
-      }
+      if (!productions[startSymbol].some(p => p.length === 1 && p[0] === 'ε')) productions[startSymbol].push(['ε']);
     }
-
     for (const k of Object.keys(productions)) {
       productions[k] = dedup(productions[k]);
       if (!productions[k].length) delete productions[k];
     }
-
     steps.push({
       id: 2, name: 'Eliminate ε-Productions', phase: 'cnf',
       desc: 'Remove epsilon rules; add combination alternatives.',
-      expl: nullable.size
-        ? `Nullable NTs: {${[...nullable].join(', ')}}. Added all non-empty combinations.`
-        : 'No nullable non-terminals — no change.',
+      expl: nullable.size ? `Nullable NTs: {${[...nullable].join(', ')}}. Added all non-empty combinations.` : 'No nullable non-terminals — no change.',
       productions: cloneP(productions), changed: nullable.size > 0, newNTs: new Set()
     });
   }
@@ -819,18 +1101,14 @@ function toCNF(grammar) {
       while (q.length) {
         const cur = q.shift();
         for (const p of (productions[cur] || [])) {
-          if (p.length === 1 && nonterminals.has(p[0]) && !c.has(p[0])) {
-            c.add(p[0]); q.push(p[0]);
-          }
+          if (p.length === 1 && nonterminals.has(p[0]) && !c.has(p[0])) { c.add(p[0]); q.push(p[0]); }
         }
       }
       return c;
     }
-
     let unitCount = 0;
     for (const ps of Object.values(productions))
       for (const p of ps) if (p.length === 1 && nonterminals.has(p[0])) unitCount++;
-
     const np = {};
     for (const nt of Object.keys(productions)) {
       const cl = unitClosure(nt);
@@ -848,7 +1126,6 @@ function toCNF(grammar) {
     }
     for (const k in productions) delete productions[k];
     Object.assign(productions, np);
-
     steps.push({
       id: 3, name: 'Eliminate Unit Productions', phase: 'cnf',
       desc: 'Replace A→B chains with actual productions.',
@@ -873,21 +1150,15 @@ function toCNF(grammar) {
       productions[k] = productions[k].filter(p => p.every(s => gen.has(s)));
       if (!productions[k].length) delete productions[k];
     }
-
     const reach = new Set([startSymbol]);
     const q = [startSymbol];
     while (q.length) {
       const c = q.shift();
-      for (const p of (productions[c] || [])) {
-        for (const s of p) {
-          if (!reach.has(s)) { reach.add(s); q.push(s); }
-        }
-      }
+      for (const p of (productions[c] || [])) for (const s of p) if (!reach.has(s)) { reach.add(s); q.push(s); }
     }
     const nrc = Object.keys(productions).filter(x => !reach.has(x)).length;
     for (const k of Object.keys(productions)) if (!reach.has(k)) delete productions[k];
     nonterminals = new Set(Object.keys(productions));
-
     steps.push({
       id: 4, name: 'Remove Useless Symbols', phase: 'cnf',
       desc: 'Remove non-generating and unreachable symbols.',
@@ -899,29 +1170,17 @@ function toCNF(grammar) {
   {
     const tm = {};
     const added = new Set();
-
     function termVar(t) {
-      if (!tm[t]) {
-        const v = fresh('T');
-        tm[t] = v;
-        productions[v] = [[t]];
-        added.add(v);
-      }
+      if (!tm[t]) { const v = fresh('T'); tm[t] = v; productions[v] = [[t]]; added.add(v); }
       return tm[t];
     }
-
     const snap = [...Object.keys(productions)];
     for (const nt of snap) {
       productions[nt] = productions[nt].map(p => {
         if (p.length <= 1) return p;
-        return p.map(s => {
-          if (s === 'ε') return s;
-          if (terminals.has(s)) return termVar(s);
-          return s;
-        });
+        return p.map(s => { if (s === 'ε') return s; if (terminals.has(s)) return termVar(s); return s; });
       });
     }
-
     const bCache = {};
     function binarize(syms) {
       if (syms.length <= 2) return syms;
@@ -929,27 +1188,18 @@ function toCNF(grammar) {
       if (bCache[key]) return [syms[0], bCache[key]];
       const rest = binarize(syms.slice(1));
       let restNT;
-      if (rest.length === 1) {
-        restNT = rest[0];
-      } else {
+      if (rest.length === 1) { restNT = rest[0]; }
+      else {
         const restKey = rest.join('\x01');
-        if (bCache[restKey]) {
-          restNT = bCache[restKey];
-        } else {
-          restNT = fresh('B');
-          productions[restNT] = [rest];
-          added.add(restNT);
-          bCache[restKey] = restNT;
-        }
+        if (bCache[restKey]) { restNT = bCache[restKey]; }
+        else { restNT = fresh('B'); productions[restNT] = [rest]; added.add(restNT); bCache[restKey] = restNT; }
       }
       bCache[key] = restNT;
       return [syms[0], restNT];
     }
-
     for (const nt of Object.keys(productions)) {
       productions[nt] = productions[nt].map(p => p.length >= 3 ? binarize(p) : p);
     }
-
     const termPairs = Object.entries(tm).map(([t, v]) => `<code>${v}→${t}</code>`).join(', ') || 'none';
     steps.push({
       id: 5, name: 'Convert to Proper CNF', phase: 'cnf',
@@ -968,7 +1218,6 @@ function toGNF(cnfResult) {
   let { startSymbol } = cnfResult;
   const isT = s => s !== 'ε' && /^[^A-Z]/.test(s);
   const isNT = s => /^[A-Z]/.test(s);
-
   let ntList = [startSymbol, ...Object.keys(productions).filter(x => x !== startSymbol)];
   const ntOrder = {};
   ntList.forEach((n, i) => ntOrder[n] = i);
@@ -985,39 +1234,24 @@ function toGNF(cnfResult) {
     for (let i = 0; i < cur.length; i++) {
       const Ai = cur[i];
       if (!productions[Ai]) continue;
-
       for (let j = 0; j < i; j++) {
         const Aj = cur[j];
         if (!productions[Aj]) continue;
         const nr = [];
         for (const p of productions[Ai]) {
-          if (p[0] === Aj) {
-            for (const s of productions[Aj]) nr.push([...s, ...p.slice(1)]);
-          } else {
-            nr.push([...p]);
-          }
+          if (p[0] === Aj) { for (const s of productions[Aj]) nr.push([...s, ...p.slice(1)]); }
+          else { nr.push([...p]); }
         }
         productions[Ai] = dedup(nr);
       }
-
       const rec = (productions[Ai] || []).filter(p => p[0] === Ai);
       const nonrec = (productions[Ai] || []).filter(p => p[0] !== Ai);
-
       if (rec.length > 0) {
         const Ap = Ai + "'";
         const nAi = [];
-        for (const b of nonrec) {
-          nAi.push([...b]);
-          nAi.push([...b, Ap]);
-        }
+        for (const b of nonrec) { nAi.push([...b]); nAi.push([...b, Ap]); }
         const nAp = [];
-        for (const fr of rec) {
-          const a = fr.slice(1);
-          if (a.length > 0) {
-            nAp.push([...a]);
-            nAp.push([...a, Ap]);
-          }
-        }
+        for (const fr of rec) { const a = fr.slice(1); if (a.length > 0) { nAp.push([...a]); nAp.push([...a, Ap]); } }
         productions[Ai] = dedup(nAi.length ? nAi : nonrec);
         if (nAp.length) productions[Ap] = dedup(nAp);
         ntOrder[Ap] = cur.length;
@@ -1029,9 +1263,7 @@ function toGNF(cnfResult) {
     steps.push({
       id: 7, name: 'Eliminate Left Recursion', phase: 'gnf',
       desc: "Apply Paull's algorithm: substitute lower NTs, then remove immediate left recursion.",
-      expl: primeNTs.size > 0
-        ? `Introduced prime variables: {${[...primeNTs].join(', ')}}. Left recursion eliminated.`
-        : 'No left recursion found — no change.',
+      expl: primeNTs.size > 0 ? `Introduced prime variables: {${[...primeNTs].join(', ')}}. Left recursion eliminated.` : 'No left recursion found — no change.',
       productions: cloneP(productions), changed: true, newNTs: primeNTs
     });
   }
@@ -1045,21 +1277,14 @@ function toGNF(cnfResult) {
         for (const p of productions[nt]) {
           if (!p.length) { nr.push(p); continue; }
           const f = p[0];
-          if (!isNT(f) || isT(f)) {
-            nr.push(p);
-          } else if (f === nt) {
-            nr.push(p);
-          } else if (productions[f]) {
-            for (const s of productions[f]) nr.push([...s, ...p.slice(1)]);
-            any = true;
-          } else {
-            nr.push(p);
-          }
+          if (!isNT(f) || isT(f)) { nr.push(p); }
+          else if (f === nt) { nr.push(p); }
+          else if (productions[f]) { for (const s of productions[f]) nr.push([...s, ...p.slice(1)]); any = true; }
+          else { nr.push(p); }
         }
         productions[nt] = dedup(nr);
       }
     }
-
     steps.push({
       id: 8, name: 'Back-Substitution to GNF', phase: 'gnf',
       desc: 'Substitute until every production starts with a terminal.',
@@ -1072,9 +1297,7 @@ function toGNF(cnfResult) {
 }
 
 function productionsToText(productions) {
-  return Object.entries(productions)
-    .map(([lhs, ps]) => `${lhs} → ${ps.map(p => p.join(' ')).join(' | ')}`)
-    .join('\n');
+  return Object.entries(productions).map(([lhs, ps]) => `${lhs} → ${ps.map(p => p.join(' ')).join(' | ')}`).join('\n');
 }
 
 const COLORS = {
@@ -1091,9 +1314,60 @@ const EXAMPLES = {
   unit:`S → A | a B\nA → B | a\nB → b | S`,
 };
 
-function StickyNav({ sections, activeSection, onNavClick, onConvertClick }) {
-  const [scrolled, setScrolled] = useState(false);
+// =================== EXPLANATION PANEL COMPONENT ===================
+function StepExplanationPanel({ step, prevProductions, origGrammar, isOpen }) {
+  const explanation = useMemo(() => generateStepExplanation(step, prevProductions, origGrammar), [step, prevProductions, origGrammar]);
+  if (!explanation) return null;
 
+  return (
+    <div className={`step-explanation-panel ${isOpen ? 'open' : ''}`}>
+      <div className="explanation-header">
+        <span className="explanation-header-icon">💡</span>
+        <span className="explanation-header-title">Step Explanation — Why this step?</span>
+      </div>
+      <div className="explanation-body">
+        <div className="expl-why" dangerouslySetInnerHTML={{ __html: explanation.why }} />
+
+        {explanation.details && explanation.details.length > 0 && (
+          <div className="expl-details">
+            {explanation.details.map((d, i) => (
+              <div className="expl-detail-row" key={i}>
+                <div className={`expl-detail-label ${d.type}`}>{d.label}</div>
+                <div className="expl-detail-value" dangerouslySetInnerHTML={{ __html: d.value }} />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {explanation.changes && (
+          <>
+            <div className="expl-changes-title">What changed</div>
+            <div className="expl-changes-list">
+              {explanation.changes.map((c, i) => (
+                <div className={`expl-change-pill ${c.type}`} key={i}>
+                  {c.type !== 'neutral' && <div className={`pill-dot ${c.type}`} />}
+                  {c.text}
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+
+        {explanation.algo && (
+          <div className="expl-algo-box">
+            <div className="expl-algo-title">Algorithm rule</div>
+            {explanation.algo.split('\n').map((line, i) => (
+              <div key={i}>{line}</div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function StickyNav({ activeSection, onNavClick }) {
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 40);
     window.addEventListener('scroll', handler, { passive: true });
@@ -1116,19 +1390,12 @@ function StickyNav({ sections, activeSection, onNavClick, onConvertClick }) {
       </div>
       <div className="nav-links">
         {navItems.map(item => (
-          <button
-            key={item.id}
-            className={`nav-link${activeSection === item.id ? ' active' : ''}`}
-            onClick={() => onNavClick(item.id)}
-          >
-            <span className="nav-link-icon">{item.icon}</span>
-            {item.label}
+          <button key={item.id} className={`nav-link${activeSection === item.id ? ' active' : ''}`} onClick={() => onNavClick(item.id)}>
+            <span className="nav-link-icon">{item.icon}</span>{item.label}
           </button>
         ))}
       </div>
-      <button className="nav-cta" onClick={() => onNavClick('calculator')}>
-        ⚡ Try Now
-      </button>
+      <button className="nav-cta" onClick={() => onNavClick('calculator')}>⚡ Try Now</button>
     </nav>
   );
 }
@@ -1149,22 +1416,14 @@ function GrammarGraph({ productions, startSymbol, prevProductions, stepInfo }) {
     const container = svgRef.current.parentElement;
     const W = container.clientWidth || 800;
     const H = 420;
-
     d3.select(svgRef.current).selectAll('*').remove();
     const svg = d3.select(svgRef.current).attr('width', W).attr('height', H);
-
     const defs = svg.append('defs');
     ['nt','t'].forEach(type => {
-      defs.append('marker')
-        .attr('id', `arrow-${type}`)
-        .attr('viewBox','0 -5 10 10')
-        .attr('refX', 20).attr('refY', 0)
-        .attr('markerWidth', 6).attr('markerHeight', 6)
-        .attr('orient', 'auto')
-        .append('path').attr('d','M0,-5L10,0L0,5')
-        .attr('fill', type === 'nt' ? '#7c5cfc' : '#5cfce8').attr('opacity', 0.7);
+      defs.append('marker').attr('id',`arrow-${type}`).attr('viewBox','0 -5 10 10').attr('refX',20).attr('refY',0)
+        .attr('markerWidth',6).attr('markerHeight',6).attr('orient','auto')
+        .append('path').attr('d','M0,-5L10,0L0,5').attr('fill', type==='nt'?'#7c5cfc':'#5cfce8').attr('opacity',0.7);
     });
-
     const filter = defs.append('filter').attr('id','glow');
     filter.append('feGaussianBlur').attr('stdDeviation','4').attr('result','blur');
     const merge = filter.append('feMerge');
@@ -1181,134 +1440,112 @@ function GrammarGraph({ productions, startSymbol, prevProductions, stepInfo }) {
     const nodes = [];
     const ntArr = [startSymbol, ...Object.keys(productions).filter(x => x !== startSymbol)];
     const tArr = [...terminals];
-
     const R_NT = Math.max(70, Math.min(130, ntArr.length * 20));
     const R_T = R_NT + 100;
-    const cx = W / 2, cy = H / 2;
+    const cx = W/2, cy = H/2;
 
-    ntArr.forEach((id, i) => {
-      const a = (2 * Math.PI * i / ntArr.length) - Math.PI / 2;
-      nodes.push({
-        id, type: 'nt', isStart: id === startSymbol,
-        isNew: !prevNTs.has(id) && prevNTs.size > 0,
-        x: cx + Math.cos(a) * R_NT, y: cy + Math.sin(a) * R_NT, r: 22
-      });
+    ntArr.forEach((id,i) => {
+      const a = (2*Math.PI*i/ntArr.length)-Math.PI/2;
+      nodes.push({ id, type:'nt', isStart: id===startSymbol, isNew: !prevNTs.has(id)&&prevNTs.size>0, x: cx+Math.cos(a)*R_NT, y: cy+Math.sin(a)*R_NT, r:22 });
     });
-    tArr.forEach((id, i) => {
-      const a = (2 * Math.PI * i / Math.max(tArr.length, 1)) - Math.PI / 2;
-      nodes.push({ id, type: 'terminal', isNew: false, x: cx + Math.cos(a) * R_T, y: cy + Math.sin(a) * R_T, r: 14 });
+    tArr.forEach((id,i) => {
+      const a = (2*Math.PI*i/Math.max(tArr.length,1))-Math.PI/2;
+      nodes.push({ id, type:'terminal', isNew:false, x: cx+Math.cos(a)*R_T, y: cy+Math.sin(a)*R_T, r:14 });
     });
 
     const edges = [];
     const seen = new Set();
-    for (const [lhs, ps] of Object.entries(productions)) {
-      for (const p of ps) {
-        for (const s of p) {
-          if (s === 'ε' || !nodes.find(n => n.id === s)) continue;
-          const k = lhs + '→' + s;
-          if (!seen.has(k)) { seen.add(k); edges.push({ source: lhs, target: s }); }
-        }
+    for (const [lhs, ps] of Object.entries(productions))
+      for (const p of ps) for (const s of p) {
+        if (s==='ε'||!nodes.find(n=>n.id===s)) continue;
+        const k = lhs+'→'+s;
+        if (!seen.has(k)) { seen.add(k); edges.push({ source:lhs, target:s }); }
       }
-    }
 
     const sim = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(edges).id(d => d.id).distance(d => d.target.type === 'terminal' ? 110 : 90).strength(0.3))
+      .force('link', d3.forceLink(edges).id(d=>d.id).distance(d=>d.target.type==='terminal'?110:90).strength(0.3))
       .force('charge', d3.forceManyBody().strength(-300))
-      .force('collision', d3.forceCollide().radius(d => d.r + 20))
-      .force('center', d3.forceCenter(cx, cy).strength(0.15));
+      .force('collision', d3.forceCollide().radius(d=>d.r+20))
+      .force('center', d3.forceCenter(cx,cy).strength(0.15));
     simRef.current = sim;
 
     const gs = 40;
     const gridG = svg.append('g');
-    for (let x = 0; x < W; x += gs) gridG.append('line').attr('x1',x).attr('y1',0).attr('x2',x).attr('y2',H).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
-    for (let y = 0; y < H; y += gs) gridG.append('line').attr('x1',0).attr('y1',y).attr('x2',W).attr('y2',y).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
+    for (let x=0;x<W;x+=gs) gridG.append('line').attr('x1',x).attr('y1',0).attr('x2',x).attr('y2',H).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
+    for (let y=0;y<H;y+=gs) gridG.append('line').attr('x1',0).attr('y1',y).attr('x2',W).attr('y2',y).attr('stroke','rgba(124,92,252,0.04)').attr('stroke-width',1);
 
     const g = svg.append('g');
-    
-    // Dynamic Auto-Zooming based on graph size
-    const maxRadius = R_T + 40; // padding
-    const initialScale = Math.min(1.2, Math.min(W / (maxRadius * 2), H / (maxRadius * 2)));
-    
-    const zoom = d3.zoom().scaleExtent([0.1, 4]).on('zoom', e => g.attr('transform', e.transform));
+    const maxRadius = R_T + 40;
+    const initialScale = Math.min(1.2, Math.min(W/(maxRadius*2), H/(maxRadius*2)));
+    const zoom = d3.zoom().scaleExtent([0.1,4]).on('zoom', e => g.attr('transform', e.transform));
     svg.call(zoom);
-    
-    // Apply calculated zoom to fit graph perfectly
-    svg.call(zoom.transform, d3.zoomIdentity.translate(W/2, H/2).scale(initialScale).translate(-cx, -cy));
+    svg.call(zoom.transform, d3.zoomIdentity.translate(W/2,H/2).scale(initialScale).translate(-cx,-cy));
 
     const link = g.append('g').selectAll('line').data(edges).join('line')
-      .attr('stroke', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? '#5cfce8' : '#7c5cfc')
-      .attr('stroke-opacity', 0.4).attr('stroke-width', 1.5)
-      .attr('stroke-dasharray', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? '4,4' : 'none')
-      .attr('marker-end', d => nodes.find(n => n.id === (typeof d.target === 'object' ? d.target.id : d.target))?.type === 'terminal' ? 'url(#arrow-t)' : 'url(#arrow-nt)');
+      .attr('stroke', d => nodes.find(n=>n.id===(typeof d.target==='object'?d.target.id:d.target))?.type==='terminal'?'#5cfce8':'#7c5cfc')
+      .attr('stroke-opacity',0.4).attr('stroke-width',1.5)
+      .attr('stroke-dasharray', d => nodes.find(n=>n.id===(typeof d.target==='object'?d.target.id:d.target))?.type==='terminal'?'4,4':'none')
+      .attr('marker-end', d => nodes.find(n=>n.id===(typeof d.target==='object'?d.target.id:d.target))?.type==='terminal'?'url(#arrow-t)':'url(#arrow-nt)');
 
-    const node = g.append('g').selectAll('g').data(nodes).join('g')
-      .attr('cursor', 'pointer')
+    const node = g.append('g').selectAll('g').data(nodes).join('g').attr('cursor','pointer')
       .call(d3.drag()
-        .on('start', (event, d) => { if (!event.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
-        .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
-        .on('end', (event, d) => { if (!event.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+        .on('start',(event,d)=>{ if(!event.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+        .on('drag',(event,d)=>{ d.fx=event.x; d.fy=event.y; })
+        .on('end',(event,d)=>{ if(!event.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
       );
 
-    node.filter(d => d.isStart).append('circle')
-      .attr('r', 30).attr('fill','none').attr('stroke','#fcc95c')
-      .attr('stroke-width',1).attr('stroke-opacity',0.3).attr('stroke-dasharray','4,4');
+    node.filter(d=>d.isStart).append('circle').attr('r',30).attr('fill','none').attr('stroke','#fcc95c').attr('stroke-width',1).attr('stroke-opacity',0.3).attr('stroke-dasharray','4,4');
 
     node.each(function(d) {
       const nd = d3.select(this);
-      if (d.type === 'nt') {
-        nd.append('circle').attr('r', d.r)
-          .attr('fill', d.isNew ? 'rgba(252,92,138,0.15)' : (d.isStart ? 'rgba(252,201,92,0.12)' : 'rgba(124,92,252,0.12)'))
-          .attr('stroke', d.isNew ? '#fc5c8a' : (d.isStart ? '#fcc95c' : '#7c5cfc'))
-          .attr('stroke-width', d.isStart ? 2.5 : 1.5)
-          .attr('filter', d.isStart ? 'url(#glow)' : null);
+      if (d.type==='nt') {
+        nd.append('circle').attr('r',d.r)
+          .attr('fill', d.isNew?'rgba(252,92,138,0.15)':(d.isStart?'rgba(252,201,92,0.12)':'rgba(124,92,252,0.12)'))
+          .attr('stroke', d.isNew?'#fc5c8a':(d.isStart?'#fcc95c':'#7c5cfc'))
+          .attr('stroke-width', d.isStart?2.5:1.5)
+          .attr('filter', d.isStart?'url(#glow)':null);
       } else {
-        nd.append('rect')
-          .attr('x', -d.r).attr('y', -d.r * 0.65)
-          .attr('width', d.r * 2).attr('height', d.r * 1.3).attr('rx', 5)
+        nd.append('rect').attr('x',-d.r).attr('y',-d.r*0.65).attr('width',d.r*2).attr('height',d.r*1.3).attr('rx',5)
           .attr('fill','rgba(92,252,232,0.08)').attr('stroke','#5cfce8').attr('stroke-width',1.5);
       }
     });
 
-    node.append('text')
-      .attr('text-anchor','middle').attr('dominant-baseline','middle')
-      .attr('fill', d => d.isNew ? '#fc5c8a' : (d.isStart ? '#fcc95c' : (d.type === 'nt' ? '#c8c8ff' : '#5cfce8')))
-      .attr('font-family','JetBrains Mono, monospace')
-      .attr('font-weight','700')
-      .attr('font-size', d => d.type === 'nt' ? '13px' : '11px')
-      .text(d => d.id);
+    node.append('text').attr('text-anchor','middle').attr('dominant-baseline','middle')
+      .attr('fill', d => d.isNew?'#fc5c8a':(d.isStart?'#fcc95c':(d.type==='nt'?'#c8c8ff':'#5cfce8')))
+      .attr('font-family','JetBrains Mono, monospace').attr('font-weight','700')
+      .attr('font-size', d => d.type==='nt'?'13px':'11px').text(d=>d.id);
 
     const tooltip = svg.append('g').style('display','none');
     const tooltipBg = tooltip.append('rect').attr('rx',8).attr('fill','rgba(20,20,34,0.95)').attr('stroke','rgba(255,255,255,0.1)').attr('stroke-width',1);
     const tooltipText = tooltip.append('text').attr('font-family','JetBrains Mono,monospace').attr('font-size','11px').attr('fill','#9898b8');
 
-    node.on('mouseover', function(event, d) {
-      d3.select(this).selectAll('circle,rect').attr('stroke-width', 2.5);
+    node.on('mouseover', function(event,d) {
+      d3.select(this).selectAll('circle,rect').attr('stroke-width',2.5);
       const ps = productions[d.id];
-      tooltipText.text(ps ? `${d.id}: ${ps.length} rule${ps.length !== 1 ? 's' : ''}` : `terminal: "${d.id}"`);
+      tooltipText.text(ps?`${d.id}: ${ps.length} rule${ps.length!==1?'s':''}`:`terminal: "${d.id}"`);
       const bb = tooltipText.node().getBBox();
       const pad = 10;
       tooltipBg.attr('x',bb.x-pad).attr('y',bb.y-pad).attr('width',bb.width+pad*2).attr('height',bb.height+pad*2);
       tooltip.style('display',null).attr('transform',`translate(${d.x+30},${d.y-20})`);
-    }).on('mouseout', function(event, d) {
-      d3.select(this).selectAll('circle').attr('stroke-width', d.isStart ? 2.5 : 1.5);
-      d3.select(this).selectAll('rect').attr('stroke-width', 1.5);
+    }).on('mouseout', function(event,d) {
+      d3.select(this).selectAll('circle').attr('stroke-width',d.isStart?2.5:1.5);
+      d3.select(this).selectAll('rect').attr('stroke-width',1.5);
       tooltip.style('display','none');
     });
 
-    sim.on('tick', () => {
-      link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
-          .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
-      node.attr('transform', d => `translate(${d.x},${d.y})`);
+    sim.on('tick',()=>{
+      link.attr('x1',d=>d.source.x).attr('y1',d=>d.source.y).attr('x2',d=>d.target.x).attr('y2',d=>d.target.y);
+      node.attr('transform',d=>`translate(${d.x},${d.y})`);
     });
 
-    if (stepInfo) setTimeout(() => showAnn(`Step ${stepInfo.id}: ${stepInfo.name}`), 200);
-    return () => { sim.stop(); };
+    if (stepInfo) setTimeout(()=>showAnn(`Step ${stepInfo.id}: ${stepInfo.name}`),200);
+    return ()=>{ sim.stop(); };
   }, [productions, startSymbol, prevProductions, stepInfo]);
 
   return (
-    <div style={{ position: 'relative' }}>
-      <div className={`anim-annotation${showAnnotation ? ' visible' : ''}`}>{annotation}</div>
-      <svg ref={svgRef} style={{ display:'block', width:'100%', height: 420 }} />
+    <div style={{ position:'relative' }}>
+      <div className={`anim-annotation${showAnnotation?' visible':''}`}>{annotation}</div>
+      <svg ref={svgRef} style={{ display:'block', width:'100%', height:420 }} />
     </div>
   );
 }
@@ -1350,25 +1587,25 @@ function VizSection({ allSteps, origGrammar, startSymbol }) {
   const playRef = useRef(null);
   const total = allSteps.length;
 
-  const curProds = step === 0 ? origGrammar.productions : allSteps[step - 1]?.productions;
-  const prevProds = step <= 1 ? origGrammar.productions : allSteps[step - 2]?.productions;
-  const stepInfo = step > 0 ? allSteps[step - 1] : null;
+  const curProds = step === 0 ? origGrammar.productions : allSteps[step-1]?.productions;
+  const prevProds = step <= 1 ? origGrammar.productions : allSteps[step-2]?.productions;
+  const stepInfo = step > 0 ? allSteps[step-1] : null;
   const lbl = step === 0 ? 'Original CFG' : `Step ${allSteps[step-1].id}: ${allSteps[step-1].name}`;
 
   const counts = useMemo(() => {
-    const c = [{ lbl: 'CFG', n: countP(origGrammar.productions), col: '#55556a' }];
-    allSteps.forEach(s => c.push({ lbl: `S${s.id}`, n: countP(s.productions), col: COLORS[s.id] }));
+    const c = [{ lbl:'CFG', n:countP(origGrammar.productions), col:'#55556a' }];
+    allSteps.forEach(s => c.push({ lbl:`S${s.id}`, n:countP(s.productions), col:COLORS[s.id] }));
     return c;
   }, [allSteps, origGrammar]);
-  const maxN = Math.max(...counts.map(d => d.n), 1);
+  const maxN = Math.max(...counts.map(d=>d.n),1);
 
   useEffect(() => {
     if (playing) {
-      playRef.current = setInterval(() => {
-        setStep(p => { if (p >= total) { setPlaying(false); return p; } return p + 1; });
+      playRef.current = setInterval(()=>{
+        setStep(p => { if (p>=total) { setPlaying(false); return p; } return p+1; });
       }, 1600);
     } else clearInterval(playRef.current);
-    return () => clearInterval(playRef.current);
+    return ()=>clearInterval(playRef.current);
   }, [playing, total]);
 
   return (
@@ -1376,24 +1613,19 @@ function VizSection({ allSteps, origGrammar, startSymbol }) {
       <div className="graph-header">
         <div className="graph-title">Grammar Graph <span className="g-tag">D3 Force</span></div>
         <div className="graph-controls">
-          <button className="g-btn" disabled={step === 0} onClick={() => { setStep(s => Math.max(0, s-1)); setPlaying(false); }}>◀</button>
+          <button className="g-btn" disabled={step===0} onClick={()=>{ setStep(s=>Math.max(0,s-1)); setPlaying(false); }}>◀</button>
           <span className="g-step-lbl">{lbl}</span>
-          <button className="g-btn" disabled={step === total} onClick={() => { setStep(s => Math.min(total, s+1)); setPlaying(false); }}>▶</button>
-          <button className="g-btn play-btn" onClick={() => { if (step >= total) setStep(0); setPlaying(p => !p); }}>
-            {playing ? '⏸ Pause' : '▶ Play'}
-          </button>
-          <button className="g-btn" title="Reset" onClick={() => { setStep(0); setPlaying(false); }}>↺</button>
-          
-          <div style={{ marginLeft: 8 }}>
-            <SectionNavArrows prevId="calculator" nextId={total > 0 ? "step-1" : "step-final"} />
-          </div>
+          <button className="g-btn" disabled={step===total} onClick={()=>{ setStep(s=>Math.min(total,s+1)); setPlaying(false); }}>▶</button>
+          <button className="g-btn play-btn" onClick={()=>{ if(step>=total) setStep(0); setPlaying(p=>!p); }}>{playing?'⏸ Pause':'▶ Play'}</button>
+          <button className="g-btn" title="Reset" onClick={()=>{ setStep(0); setPlaying(false); }}>↺</button>
+          <div style={{ marginLeft:8 }}><SectionNavArrows prevId="calculator" nextId={total>0?"step-1":"step-final"} /></div>
         </div>
       </div>
       <div className="graph-slider-row">
         <span className="g-slider-lbl">CFG</span>
         <input type="range" className="g-slider" min={0} max={total} value={step}
-          onChange={e => { setStep(+e.target.value); setPlaying(false); }} />
-        <span className="g-slider-lbl">{allSteps[total-1]?.phase === 'gnf' ? 'GNF' : 'CNF'}</span>
+          onChange={e=>{ setStep(+e.target.value); setPlaying(false); }} />
+        <span className="g-slider-lbl">{allSteps[total-1]?.phase==='gnf'?'GNF':'CNF'}</span>
       </div>
       <div id="graphContainer">
         <div className="graph-canvas-overlay" />
@@ -1410,10 +1642,10 @@ function VizSection({ allSteps, origGrammar, startSymbol }) {
       <div className="bar-section">
         <div className="bar-lbl">Productions per step</div>
         <div className="bar-row">
-          {counts.map((d, i) => (
-            <div key={i} className="bar-col" onClick={() => setStep(i)} style={{ opacity: i === step ? 1 : 0.45, transition: 'opacity 0.2s' }}>
+          {counts.map((d,i) => (
+            <div key={i} className="bar-col" onClick={()=>setStep(i)} style={{ opacity: i===step?1:0.45, transition:'opacity 0.2s' }}>
               <div className="bar-n">{d.n}</div>
-              <div className="bar-fill" style={{ height: Math.max(3, (d.n/maxN)*52)+'px', background: d.col }} />
+              <div className="bar-fill" style={{ height:Math.max(3,(d.n/maxN)*52)+'px', background:d.col }} />
               <div className="bar-s">{d.lbl}</div>
             </div>
           ))}
@@ -1423,38 +1655,62 @@ function VizSection({ allSteps, origGrammar, startSymbol }) {
   );
 }
 
-function StepCard({ step, delay = 0, totalSteps }) {
+// =================== ENHANCED STEP CARD ===================
+function StepCard({ step, delay = 0, totalSteps, prevProductions, origGrammar }) {
   const [expanded, setExpanded] = useState(true);
+  const [explOpen, setExplOpen] = useState(false);
   const c = COLORS[step.id] || '#7c5cfc';
   const phaseBg = step.phase === 'gnf' ? 'rgba(92,252,232,0.06)' : 'rgba(124,92,252,0.06)';
+
   return (
-    <div className="step-card" id={`step-${step.id}`} style={{ animationDelay: `${delay}ms`, borderTop: `2px solid ${c}` }}>
+    <div className="step-card" id={`step-${step.id}`} style={{ animationDelay:`${delay}ms`, borderTop:`2px solid ${c}` }}>
       <div className="step-card-top">
         <div className="step-card-left">
-          <div className="snum" style={{ background: c }}>{step.id}</div>
+          <div className="snum" style={{ background:c }}>{step.id}</div>
           <div>
             <div className="sname">{step.name}</div>
             <div className="sdesc">{step.desc}</div>
           </div>
         </div>
-        <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0, marginTop:4 }}>
-          <span style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:10, padding:'3px 8px', borderRadius:20, background: phaseBg, color: step.phase === 'gnf' ? 'var(--accent3)' : 'var(--accent)', textTransform:'uppercase', letterSpacing:1 }}>{step.phase}</span>
-          <div className={`sbadge${step.changed ? ' mod' : ' nomod'}`}>{step.changed ? '✓ Modified' : '— No change'}</div>
-          <button className="toggle-btn" onClick={() => setExpanded(x => !x)}>{expanded ? '▲' : '▼'}</button>
-          
-          <div style={{ marginLeft: 8 }}>
-            <SectionNavArrows 
-              prevId={step.id === 1 ? 'graph-section' : `step-${step.id - 1}`} 
-              nextId={step.id === totalSteps ? 'step-final' : `step-${step.id + 1}`} 
+        <div className="step-controls-row">
+          <span style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:10, padding:'3px 8px', borderRadius:20, background:phaseBg, color:step.phase==='gnf'?'var(--accent3)':'var(--accent)', textTransform:'uppercase', letterSpacing:1 }}>{step.phase}</span>
+          <div className={`sbadge${step.changed?' mod':' nomod'}`}>{step.changed?'✓ Modified':'— No change'}</div>
+
+          {/* Explain toggle button */}
+          <button
+            className={`explain-toggle-btn${explOpen?' open':''}`}
+            onClick={() => setExplOpen(x => !x)}
+            title={explOpen ? 'Hide explanation' : 'Show why this step was applied'}
+          >
+            <span className="explain-icon" style={{ fontSize:13 }}>{explOpen ? '🔼' : '💡'}</span>
+            {explOpen ? 'Hide explanation' : 'Explain this step'}
+          </button>
+
+          <button className="toggle-btn" onClick={()=>setExpanded(x=>!x)} title={expanded?'Collapse rules':'Expand rules'}>{expanded?'▲':'▼'}</button>
+          <div style={{ marginLeft:8 }}>
+            <SectionNavArrows
+              prevId={step.id===1?'graph-section':`step-${step.id-1}`}
+              nextId={step.id===totalSteps?'step-final':`step-${step.id+1}`}
             />
           </div>
         </div>
       </div>
-      <div className="step-explain" style={{ borderLeftColor: c }} dangerouslySetInnerHTML={{ __html: step.expl }} />
-      {expanded && <>
-        <div className="prods-lbl">Result Grammar ({countP(step.productions)} rules)</div>
-        <ProdsList productions={step.productions} newNTs={step.newNTs} />
-      </>}
+
+      {/* Dynamic Explanation Panel */}
+      <StepExplanationPanel
+        step={step}
+        prevProductions={prevProductions}
+        origGrammar={origGrammar}
+        isOpen={explOpen}
+      />
+
+      {expanded && (
+        <>
+          <div className="step-body-divider" />
+          <div className="prods-lbl" style={{ marginTop:16 }}>Result Grammar ({countP(step.productions)} rules)</div>
+          <ProdsList productions={step.productions} newNTs={step.newNTs} />
+        </>
+      )}
     </div>
   );
 }
@@ -1462,50 +1718,44 @@ function StepCard({ step, delay = 0, totalSteps }) {
 function FinalPanel({ cnfResult, gnfResult, origGrammar, allSteps }) {
   const [tab, setTab] = useState(cnfResult ? 'cnf' : gnfResult ? 'gnf' : 'stats');
   const [copied, setCopied] = useState('');
-
   const cnfNTs = cnfResult ? getAllNTs(cnfResult.finalProductions) : null;
   const gnfNTs = gnfResult ? getAllNTs(gnfResult.finalProductions) : null;
 
   function copyText(text, label) {
-    navigator.clipboard?.writeText(text).then(() => {
-      setCopied(label);
-      setTimeout(() => setCopied(''), 2000);
-    });
+    navigator.clipboard?.writeText(text).then(() => { setCopied(label); setTimeout(()=>setCopied(''),2000); });
   }
-
   function downloadText(text, filename) {
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([text],{type:'text/plain'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url; a.download = filename; a.click();
-    URL.revokeObjectURL(url);
+    a.href=url; a.download=filename; a.click(); URL.revokeObjectURL(url);
   }
 
   return (
     <div className="final-card" id="step-final">
       <div className="final-header-bar">
-        {cnfResult && <button className={`ftab${tab === 'cnf' ? ' active' : ''}`} onClick={() => setTab('cnf')}>🎯 CNF Grammar</button>}
-        {gnfResult && <button className={`ftab${tab === 'gnf' ? ' active' : ''}`} onClick={() => setTab('gnf')}>🔮 GNF Grammar</button>}
-        <button className={`ftab${tab === 'stats' ? ' active' : ''}`} onClick={() => setTab('stats')}>📊 Statistics</button>
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', paddingRight: 28 }}>
-          <SectionNavArrows prevId={allSteps.length > 0 ? `step-${allSteps.length}` : 'graph-section'} nextId={null} />
+        {cnfResult && <button className={`ftab${tab==='cnf'?' active':''}`} onClick={()=>setTab('cnf')}>🎯 CNF Grammar</button>}
+        {gnfResult && <button className={`ftab${tab==='gnf'?' active':''}`} onClick={()=>setTab('gnf')}>🔮 GNF Grammar</button>}
+        <button className={`ftab${tab==='stats'?' active':''}`} onClick={()=>setTab('stats')}>📊 Statistics</button>
+        <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', paddingRight:28 }}>
+          <SectionNavArrows prevId={allSteps.length>0?`step-${allSteps.length}`:'graph-section'} nextId={null} />
         </div>
       </div>
 
       {cnfResult && (
-        <div className={`ftab-content${tab === 'cnf' ? ' active' : ''}`}>
+        <div className={`ftab-content${tab==='cnf'?' active':''}`}>
           <div className="fstats">
             <div className="fstat"><span className="fstat-val gold">{cnfNTs.size}</span><div className="fstat-lbl">Non-terminals</div></div>
             <div className="fstat"><span className="fstat-val">{countP(cnfResult.finalProductions)}</span><div className="fstat-lbl">Productions</div></div>
-            <div className="fstat"><span className={`fstat-val${checkCNF(cnfResult.finalProductions) ? ' ok' : ''}`}>{checkCNF(cnfResult.finalProductions) ? '✓' : '⚠'}</span><div className="fstat-lbl">Valid CNF</div></div>
+            <div className="fstat"><span className={`fstat-val${checkCNF(cnfResult.finalProductions)?' ok':''}`}>{checkCNF(cnfResult.finalProductions)?'✓':'⚠'}</span><div className="fstat-lbl">Valid CNF</div></div>
           </div>
           <div className="form-note"><strong>Chomsky Normal Form:</strong> Every production is A→BC (two non-terminals) or A→a (one terminal). Enables CYK parsing in O(n³) time.</div>
           <ProdsList productions={cnfResult.finalProductions} newNTs={new Set()} />
           <div className="export-bar">
-            <button className="export-btn export-btn-copy" onClick={() => copyText(productionsToText(cnfResult.finalProductions), 'cnf')}>
-              📋 {copied === 'cnf' ? 'Copied!' : 'Copy CNF'}
+            <button className="export-btn export-btn-copy" onClick={()=>copyText(productionsToText(cnfResult.finalProductions),'cnf')}>
+              📋 {copied==='cnf'?'Copied!':'Copy CNF'}
             </button>
-            <button className="export-btn export-btn-plain" onClick={() => downloadText(productionsToText(cnfResult.finalProductions), 'grammar-cnf.txt')}>
+            <button className="export-btn export-btn-plain" onClick={()=>downloadText(productionsToText(cnfResult.finalProductions),'grammar-cnf.txt')}>
               ↓ Download .txt
             </button>
           </div>
@@ -1513,37 +1763,37 @@ function FinalPanel({ cnfResult, gnfResult, origGrammar, allSteps }) {
       )}
 
       {gnfResult && (
-        <div className={`ftab-content${tab === 'gnf' ? ' active' : ''}`}>
+        <div className={`ftab-content${tab==='gnf'?' active':''}`}>
           <div className="fstats">
             <div className="fstat"><span className="fstat-val gold">{gnfNTs.size}</span><div className="fstat-lbl">Non-terminals</div></div>
             <div className="fstat"><span className="fstat-val">{countP(gnfResult.finalProductions)}</span><div className="fstat-lbl">Productions</div></div>
-            <div className="fstat"><span className={`fstat-val${checkGNF(gnfResult.finalProductions) ? ' ok' : ''}`}>{checkGNF(gnfResult.finalProductions) ? '✓' : '~'}</span><div className="fstat-lbl">GNF Form</div></div>
+            <div className="fstat"><span className={`fstat-val${checkGNF(gnfResult.finalProductions)?' ok':''}` }>{checkGNF(gnfResult.finalProductions)?'✓':'~'}</span><div className="fstat-lbl">GNF Form</div></div>
           </div>
           <div className="form-note" style={{ borderColor:'rgba(92,252,232,0.15)', background:'rgba(92,252,232,0.05)' }}>
             <strong style={{ color:'var(--accent3)' }}>Greibach Normal Form:</strong> Every production starts with a terminal: A→aα. Eliminates all left recursion and simplifies pushdown automata construction.
           </div>
           <ProdsList productions={gnfResult.finalProductions} newNTs={new Set()} />
           <div className="export-bar">
-            <button className="export-btn export-btn-copy" onClick={() => copyText(productionsToText(gnfResult.finalProductions), 'gnf')}>
-              📋 {copied === 'gnf' ? 'Copied!' : 'Copy GNF'}
+            <button className="export-btn export-btn-copy" onClick={()=>copyText(productionsToText(gnfResult.finalProductions),'gnf')}>
+              📋 {copied==='gnf'?'Copied!':'Copy GNF'}
             </button>
-            <button className="export-btn export-btn-plain" onClick={() => downloadText(productionsToText(gnfResult.finalProductions), 'grammar-gnf.txt')}>
+            <button className="export-btn export-btn-plain" onClick={()=>downloadText(productionsToText(gnfResult.finalProductions),'grammar-gnf.txt')}>
               ↓ Download .txt
             </button>
           </div>
         </div>
       )}
 
-      <div className={`ftab-content${tab === 'stats' ? ' active' : ''}`}>
+      <div className={`ftab-content${tab==='stats'?' active':''}`}>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(220px,1fr))', gap:12 }}>
           {[
             { title:'Original CFG', col:'#55556a', rows:[['Non-terminals',origGrammar.nonterminals.size],['Terminals',origGrammar.terminals.size],['Productions',countP(origGrammar.productions)],['Start Symbol',origGrammar.startSymbol]] },
             cnfResult && { title:'After CNF', col:'#7c5cfc', rows:[['Non-terminals',cnfNTs.size],['Productions',countP(cnfResult.finalProductions)],['Conversion Steps',cnfResult.steps.length],['Valid CNF?',checkCNF(cnfResult.finalProductions)?'Yes ✓':'Partial']] },
             gnfResult && { title:'After GNF', col:'#5cfce8', rows:[['Non-terminals',gnfNTs.size],['Productions',countP(gnfResult.finalProductions)],['Extra Steps',gnfResult.steps.length],['Left Recursive?','No ✓']] },
-          ].filter(Boolean).map((c, i) => (
+          ].filter(Boolean).map((c,i) => (
             <div key={i} style={{ background:'rgba(255,255,255,0.03)', border:`1px solid ${c.col}25`, borderRadius:14, padding:20 }}>
               <div style={{ fontFamily:'"JetBrains Mono",monospace', fontSize:11, color:c.col, textTransform:'uppercase', letterSpacing:2, marginBottom:14 }}>{c.title}</div>
-              {c.rows.map(([k, v]) => (
+              {c.rows.map(([k,v]) => (
                 <div key={k} style={{ display:'flex', justifyContent:'space-between', gap:12, fontSize:13, marginTop:8 }}>
                   <span style={{ color:'var(--text2)' }}>{k}</span>
                   <span style={{ fontFamily:'"JetBrains Mono",monospace', color:c.col }}>{v}</span>
@@ -1559,17 +1809,17 @@ function FinalPanel({ cnfResult, gnfResult, origGrammar, allSteps }) {
 
 function Particles() {
   const containerRef = useRef(null);
-  useEffect(() => {
-    if (!containerRef.current) return;
+  useEffect(()=>{
+    if(!containerRef.current) return;
     const c = containerRef.current;
-    for (let i = 0; i < 30; i++) {
+    for(let i=0;i<30;i++){
       const p = document.createElement('div');
-      p.className = 'particle';
-      p.style.cssText = `left:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-duration:${6+Math.random()*12}s;animation-delay:${Math.random()*8}s;background:${Math.random()>0.5?'#7c5cfc':Math.random()>0.5?'#5cfce8':'#fc5c8a'};`;
+      p.className='particle';
+      p.style.cssText=`left:${Math.random()*100}%;width:${1+Math.random()*2}px;height:${1+Math.random()*2}px;animation-duration:${6+Math.random()*12}s;animation-delay:${Math.random()*8}s;background:${Math.random()>0.5?'#7c5cfc':Math.random()>0.5?'#5cfce8':'#fc5c8a'};`;
       c.appendChild(p);
     }
-    return () => { while (c.firstChild) c.removeChild(c.firstChild); };
-  }, []);
+    return ()=>{ while(c.firstChild) c.removeChild(c.firstChild); };
+  },[]);
   return <div className="particles" ref={containerRef} />;
 }
 
@@ -1579,7 +1829,7 @@ function AboutSection() {
     { icon:'🔀', title:'Greibach Normal Form (GNF)', desc:'Every production starts with a terminal: A→aα. Eliminates all left recursion and enables direct construction of equivalent pushdown automata.', badge:'Terminal-First', g:'linear-gradient(135deg,#5cfce8,#5ca8fc)', bg:'rgba(92,252,232,0.08)' },
     { icon:'⚙️', title:'5-Step CNF Algorithm', desc:'New start → Eliminate ε-rules → Eliminate unit rules → Remove useless symbols → Binarize. Each step is shown with intermediate grammar states.', badge:'Systematic', g:'linear-gradient(135deg,#fcc95c,#fc5c8a)', bg:'rgba(252,201,92,0.08)' },
     { icon:'🔗', title:'Interactive D3 Graph', desc:'Force-directed graph animating each transformation. Drag nodes, zoom in/out, and see newly added symbols highlighted in real time.', badge:'Live Viz', g:'linear-gradient(135deg,#5ca8fc,#7c5cfc)', bg:'rgba(92,168,252,0.08)' },
-    { icon:'🧩', title:'Step-by-Step Breakdown', desc:'Every intermediate grammar is shown with color-coded tokens. Expand/collapse steps and navigate via the sidebar.', badge:'Educational', g:'linear-gradient(135deg,#fc5c8a,#fcc95c)', bg:'rgba(252,92,138,0.08)' },
+    { icon:'🧩', title:'Step-by-Step Breakdown', desc:'Every intermediate grammar is shown with color-coded tokens. Expand/collapse steps, and read dynamic explanations of exactly what changed and why.', badge:'Educational', g:'linear-gradient(135deg,#fc5c8a,#fcc95c)', bg:'rgba(252,92,138,0.08)' },
     { icon:'📤', title:'Export Results', desc:'Copy the final CNF or GNF grammar to clipboard or download it as a .txt file. Perfect for assignment submissions and notes.', badge:'Export Ready', g:'linear-gradient(135deg,#5cfce8,#7c5cfc)', bg:'rgba(92,252,232,0.06)' },
   ];
   return (
@@ -1596,12 +1846,12 @@ function AboutSection() {
           A pedagogical tool for Theory of Automata &amp; Formal Languages. Enter any Context-Free Grammar and watch it transform step-by-step into standardized normal forms.
         </p>
         <div className="about-grid">
-          {cards.map((c, i) => (
-            <div className="about-card" key={i} style={{ '--g': c.g }}>
-              <div className="card-icon" style={{ background: c.bg }}>{c.icon}</div>
+          {cards.map((c,i) => (
+            <div className="about-card" key={i} style={{ '--g':c.g }}>
+              <div className="card-icon" style={{ background:c.bg }}>{c.icon}</div>
               <div className="card-title">{c.title}</div>
               <div className="card-desc">{c.desc}</div>
-              <div className="card-badge" style={{ background: c.bg, color:'white', filter:'brightness(1.5)' }}>{c.badge}</div>
+              <div className="card-badge" style={{ background:c.bg, color:'white', filter:'brightness(1.5)' }}>{c.badge}</div>
             </div>
           ))}
         </div>
@@ -1612,16 +1862,16 @@ function AboutSection() {
 
 function CheatSheetSection() {
   const cnfSteps = [
-    { n: 1, name: 'New Start Symbol', desc: 'If S appears on any RHS, create S₀ → S and make S₀ the new start.', code: 'S₀ → S' },
-    { n: 2, name: 'Eliminate ε-Productions', desc: 'Find all nullable NTs. For each rule, add all variants that omit nullable symbols. Remove A→ε.', code: 'nullable: A if A→ε or A→Bα where B nullable' },
-    { n: 3, name: 'Eliminate Unit Productions', desc: 'Replace A→B with all productions reachable from B via unit chain. Transitive closure.', code: 'unit(A) = {B : A ⇒* B via unit rules}' },
-    { n: 4, name: 'Remove Useless Symbols', desc: 'Remove non-generating NTs (can\'t derive terminals). Then remove unreachable NTs.', code: 'generating + reachable = useful' },
-    { n: 5, name: 'Convert to Binary Form', desc: 'Replace terminals in mixed rules with proxy NTs (Tₐ→a). Binarize long rules A→B₁B₂...Bₙ.', code: 'A→B₁B₂B₃ becomes A→B₁X, X→B₂B₃' },
+    { n:1, name:'New Start Symbol', desc:"If S appears on any RHS, create S₀ → S and make S₀ the new start.", code:'S₀ → S' },
+    { n:2, name:'Eliminate ε-Productions', desc:'Find all nullable NTs. For each rule, add all variants that omit nullable symbols. Remove A→ε.', code:'nullable: A if A→ε or A→Bα where B nullable' },
+    { n:3, name:'Eliminate Unit Productions', desc:'Replace A→B with all productions reachable from B via unit chain. Transitive closure.', code:'unit(A) = {B : A ⇒* B via unit rules}' },
+    { n:4, name:'Remove Useless Symbols', desc:"Remove non-generating NTs (can't derive terminals). Then remove unreachable NTs.", code:'generating + reachable = useful' },
+    { n:5, name:'Convert to Binary Form', desc:'Replace terminals in mixed rules with proxy NTs (Tₐ→a). Binarize long rules A→B₁B₂...Bₙ.', code:'A→B₁B₂B₃ becomes A→B₁X, X→B₂B₃' },
   ];
   const gnfSteps = [
-    { n: 6, name: 'Order Non-Terminals', desc: 'Assign a total ordering A₁ < A₂ < ... < Aₙ to all non-terminals. Start symbol is A₁.', code: 'A₁ = start symbol' },
-    { n: 7, name: 'Eliminate Left Recursion', desc: 'For each Aᵢ: substitute all Aⱼ (j<i) on the left. Then eliminate any immediate left recursion.', code: 'A→Aα|β becomes A→βA\', A\'→αA\'|α' },
-    { n: 8, name: 'Back-Substitution', desc: 'Work from Aₙ backward: substitute the first symbol of each rule until every rule starts with a terminal.', code: 'repeat until ∀A: A→aα' },
+    { n:6, name:'Order Non-Terminals', desc:'Assign a total ordering A₁ < A₂ < ... < Aₙ to all non-terminals. Start symbol is A₁.', code:'A₁ = start symbol' },
+    { n:7, name:'Eliminate Left Recursion', desc:'For each Aᵢ: substitute all Aⱼ (j<i) on the left. Then eliminate any immediate left recursion.', code:"A→Aα|β becomes A→βA', A'→αA'|α" },
+    { n:8, name:'Back-Substitution', desc:'Work from Aₙ backward: substitute the first symbol of each rule until every rule starts with a terminal.', code:'repeat until ∀A: A→aα' },
   ];
 
   return (
@@ -1637,19 +1887,15 @@ function CheatSheetSection() {
         <p style={{ color:'var(--text2)', fontSize:15, lineHeight:1.7, maxWidth:600, marginBottom:0 }}>
           A concise reference for both algorithms. Use this alongside the step-by-step output below.
         </p>
-        
         <div className="algo-steps-grid">
           <div className="algo-block">
             <div className="algo-block-header">
               <span className="algo-block-icon">📐</span>
-              <div>
-                <div className="algo-block-title">CFG → CNF</div>
-                <div className="algo-block-sub">5 Steps · Chomsky Normal Form</div>
-              </div>
+              <div><div className="algo-block-title">CFG → CNF</div><div className="algo-block-sub">5 Steps · Chomsky Normal Form</div></div>
             </div>
             {cnfSteps.map(s => (
               <div className="algo-step-row" key={s.n}>
-                <div className="algo-step-num" style={{ background: COLORS[s.n] }}>{s.n}</div>
+                <div className="algo-step-num" style={{ background:COLORS[s.n] }}>{s.n}</div>
                 <div className="algo-step-body">
                   <div className="algo-step-name">{s.name}</div>
                   <div className="algo-step-desc">{s.desc}</div>
@@ -1661,14 +1907,11 @@ function CheatSheetSection() {
           <div className="algo-block">
             <div className="algo-block-header">
               <span className="algo-block-icon">🔮</span>
-              <div>
-                <div className="algo-block-title">CNF → GNF</div>
-                <div className="algo-block-sub">3 Steps · Greibach Normal Form</div>
-              </div>
+              <div><div className="algo-block-title">CNF → GNF</div><div className="algo-block-sub">3 Steps · Greibach Normal Form</div></div>
             </div>
             {gnfSteps.map(s => (
               <div className="algo-step-row" key={s.n}>
-                <div className="algo-step-num" style={{ background: COLORS[s.n] }}>{s.n}</div>
+                <div className="algo-step-num" style={{ background:COLORS[s.n] }}>{s.n}</div>
                 <div className="algo-step-body">
                   <div className="algo-step-name">{s.name}</div>
                   <div className="algo-step-desc">{s.desc}</div>
@@ -1696,77 +1939,62 @@ function App() {
   const [result, setResult] = useState(null);
   const [activeSection, setActiveSection] = useState('hero');
 
-  const sectionIds = ['hero', 'about', 'cheatsheet', 'calculator', 'results'];
-  const sectionRefs = useRef({});
+  const sectionIds = ['hero','about','cheatsheet','calculator','results'];
 
-  useEffect(() => {
+  useEffect(()=>{
     initCursor();
     initScrollProgress();
+    const observer = new IntersectionObserver((entries)=>{
+      for (const entry of entries)
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.25) setActiveSection(entry.target.id);
+    }, { threshold:0.25 });
+    sectionIds.forEach(id=>{ const el=document.getElementById(id); if(el) observer.observe(el); });
+    return ()=>observer.disconnect();
+  },[]);
 
-    const observer = new IntersectionObserver((entries) => {
-      for (const entry of entries) {
-        if (entry.isIntersecting && entry.intersectionRatio >= 0.25) {
-          setActiveSection(entry.target.id);
-        }
-      }
-    }, { threshold: 0.25 });
-
-    sectionIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-
-    return () => observer.disconnect();
-  }, []);
-
-  const scrollToSection = useCallback((id) => {
+  const scrollToSection = useCallback((id)=>{
     const el = document.getElementById(id);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, []);
+    if(el) el.scrollIntoView({ behavior:'smooth', block:'start' });
+  },[]);
 
-  const allSteps = useMemo(() => {
-    if (!result) return [];
+  const allSteps = useMemo(()=>{
+    if(!result) return [];
     const s = [];
-    if (result.cnfResult) s.push(...result.cnfResult.steps);
-    if (result.gnfResult) s.push(...result.gnfResult.steps);
+    if(result.cnfResult) s.push(...result.cnfResult.steps);
+    if(result.gnfResult) s.push(...result.gnfResult.steps);
     return s;
-  }, [result]);
+  },[result]);
 
-  const handleValidate = useCallback(() => {
+  const handleValidate = useCallback(()=>{
     const info = validateGrammarOnly(grammarText);
-    setValidInfo(info);
-    setError(info.ok ? '' : info.error);
-    if (!info.ok) setValidInfo(null);
-  }, [grammarText]);
+    setValidInfo(info); setError(info.ok?'':info.error);
+    if(!info.ok) setValidInfo(null);
+  },[grammarText]);
 
-  const handleConvert = useCallback(() => {
+  const handleConvert = useCallback(()=>{
     setError(''); setValidInfo(null); setLoading(true);
-    setTimeout(() => {
+    setTimeout(()=>{
       try {
         const grammar = parseGrammar(grammarText);
         let cnfResult = null, gnfResult = null;
-        if (mode === 'cnf' || mode === 'both') cnfResult = toCNF(grammar);
-        if (mode === 'gnf' || mode === 'both') {
+        if(mode==='cnf'||mode==='both') cnfResult = toCNF(grammar);
+        if(mode==='gnf'||mode==='both') {
           const base = cnfResult || toCNF(grammar);
           gnfResult = toGNF(base);
-          if (!cnfResult) cnfResult = base;
+          if(!cnfResult) cnfResult = base;
         }
-        setResult({ cnfResult, gnfResult, origGrammar: grammar });
+        setResult({ cnfResult, gnfResult, origGrammar:grammar });
         setLoading(false);
-        setTimeout(() => scrollToSection('results'), 300);
-      } catch (e) {
+        setTimeout(()=>scrollToSection('results'),300);
+      } catch(e) {
         setError(e.message); setLoading(false);
       }
-    }, 600);
-  }, [grammarText, mode, scrollToSection]);
+    },600);
+  },[grammarText,mode,scrollToSection]);
 
   return (
     <>
-      <StickyNav
-        activeSection={activeSection}
-        onNavClick={scrollToSection}
-        onConvertClick={() => scrollToSection('calculator')}
-      />
+      <StickyNav activeSection={activeSection} onNavClick={scrollToSection} />
 
       <section className="hero" id="hero">
         <div className="hero-bg" />
@@ -1781,16 +2009,14 @@ function App() {
             <span className="amp">&amp;</span>{' '}
             <span className="word-gnf">GNF</span>
           </h1>
-          <p className="hero-desc">
-            Step-by-step transformation of Context-Free Grammars into Chomsky Normal Form and Greibach Normal Form with interactive visualization.
-          </p>
+          <p className="hero-desc">Step-by-step transformation of Context-Free Grammars into Chomsky Normal Form and Greibach Normal Form with interactive visualization.</p>
           <p className="hero-sub">paste your grammar · watch it transform · understand every step</p>
           <div className="hero-chips">
-            {['D3 Force Graph','Step-by-step Viz','ε-elimination','Unit rule removal','Left recursion elim','CNF & GNF','Export Results','Algorithm Cheat Sheet'].map(c => (
+            {['D3 Force Graph','Step-by-step Viz','ε-elimination','Unit rule removal','Left recursion elim','CNF & GNF','Dynamic Explanations','Export Results'].map(c=>(
               <div className="chip" key={c}><span>✦</span>{c}</div>
             ))}
           </div>
-          <div className="scroll-cta" onClick={() => scrollToSection('about')}>
+          <div className="scroll-cta" onClick={()=>scrollToSection('about')}>
             <span className="scroll-cta-text">Explore</span>
             <div className="scroll-arrow-container">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1802,42 +2028,34 @@ function App() {
       </section>
 
       <AboutSection />
-
       <CheatSheetSection />
 
       <section className="calculator" id="calculator">
         <div className="calc-inner">
-          <div style={{ position: 'absolute', right: 0, top: 0, zIndex: 10 }}>
+          <div style={{ position:'absolute', right:0, top:0, zIndex:10 }}>
             <SectionNavArrows prevId="cheatsheet" nextId="results" />
           </div>
-          
           <div className="calc-header">
-            <div className="section-label" style={{ justifyContent: 'center' }}>Grammar Converter</div>
+            <div className="section-label" style={{ justifyContent:'center' }}>Grammar Converter</div>
             <h2>Enter Your Grammar</h2>
             <p>Paste or type your CFG below. Use uppercase for non-terminals, → or -&gt; for arrows.</p>
           </div>
-
           <div className="mode-bar">
-            {[['cnf','→ CNF'],['gnf','→ GNF'],['both','→ Both']].map(([m, lbl]) => (
-              <button key={m} className={`mode-btn${mode === m ? ` active active-${m}` : ''}`} onClick={() => setMode(m)}>
-                {lbl}
-              </button>
+            {[['cnf','→ CNF'],['gnf','→ GNF'],['both','→ Both']].map(([m,lbl])=>(
+              <button key={m} className={`mode-btn${mode===m?` active active-${m}`:''}`} onClick={()=>setMode(m)}>{lbl}</button>
             ))}
           </div>
-
           <div className="input-card">
             <div className="input-top">
               <div className="input-title"><div className="live-dot" />Grammar Input</div>
               <div className="examples-row">
-                {Object.entries({ testCase:'📝 Image Test', expr:'∑ Expr', palindrome:'↔ Palindrome', balanced:'() Balanced', simple:'★ Simple' }).map(([k, lbl]) => (
-                  <button key={k} className="ex-btn" onClick={() => { setGrammarText(EXAMPLES[k]); setError(''); setValidInfo(null); }}>{lbl}</button>
+                {Object.entries({ testCase:'📝 Image Test', expr:'∑ Expr', palindrome:'↔ Palindrome', balanced:'() Balanced', simple:'★ Simple' }).map(([k,lbl])=>(
+                  <button key={k} className="ex-btn" onClick={()=>{ setGrammarText(EXAMPLES[k]); setError(''); setValidInfo(null); }}>{lbl}</button>
                 ))}
               </div>
             </div>
-            <textarea
-              className="grammar-ta"
-              value={grammarText}
-              onChange={e => { setGrammarText(e.target.value); setError(''); setValidInfo(null); }}
+            <textarea className="grammar-ta" value={grammarText}
+              onChange={e=>{ setGrammarText(e.target.value); setError(''); setValidInfo(null); }}
               placeholder={`Enter grammar rules, one per line:\nS → A B | a\nA → a A | a\nB → b B | b`}
             />
             <div className="input-bottom">
@@ -1850,7 +2068,6 @@ function App() {
               <button className="validate-btn" onClick={handleValidate}>✓ Validate</button>
             </div>
           </div>
-
           {validInfo && !error && (
             <div className="valid-box visible">
               <span>✓</span>
@@ -1858,7 +2075,6 @@ function App() {
             </div>
           )}
           {error && <div className="error-box visible"><span>⚠</span><span>{error}</span></div>}
-
           <div className="convert-wrap">
             <button className="convert-btn" onClick={handleConvert} disabled={loading}>
               {loading ? (
@@ -1867,11 +2083,10 @@ function App() {
                 <><span className="btn-spark">⚡</span> Convert Grammar</>
               )}
             </button>
-            <div className={`loading-bar${loading ? ' visible' : ''}`}><div className="loading-fill" /></div>
+            <div className={`loading-bar${loading?' visible':''}`}><div className="loading-fill" /></div>
           </div>
-
           {result && (
-            <div className="scroll-down-cue" onClick={() => scrollToSection('results')}>
+            <div className="scroll-down-cue" onClick={()=>scrollToSection('results')}>
               <span className="sdc-text">View results</span>
               <div className="sdc-arrow">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1895,19 +2110,19 @@ function App() {
             <>
               <div className="results-top">
                 <div className="results-h">Transformation Steps</div>
-                <div className="results-badge">✓ {result.cnfResult && result.gnfResult ? 'CNF + GNF' : result.cnfResult ? 'CNF' : 'GNF'} Complete</div>
+                <div className="results-badge">✓ {result.cnfResult&&result.gnfResult?'CNF + GNF':result.cnfResult?'CNF':'GNF'} Complete</div>
               </div>
               <div className="results-layout">
                 <div className="steps-nav">
                   <div className="nav-header">Steps ({allSteps.length})</div>
-                  {allSteps.map(step => (
-                    <div key={step.id} className="nav-item" onClick={() => document.getElementById(`step-${step.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })}>
-                      <div className="nav-num" style={{ background: COLORS[step.id] }}>{step.id}</div>
+                  {allSteps.map(step=>(
+                    <div key={step.id} className="nav-item" onClick={()=>document.getElementById(`step-${step.id}`)?.scrollIntoView({behavior:'smooth',block:'start'})}>
+                      <div className="nav-num" style={{ background:COLORS[step.id] }}>{step.id}</div>
                       <div className="nav-info">
                         <div className="nav-name">{step.name}</div>
                         <div className="nav-sub">{step.phase?.toUpperCase()} · {countP(step.productions)} rules</div>
                       </div>
-                      <div className="nav-status">{step.changed ? '✓' : '—'}</div>
+                      <div className="nav-status">{step.changed?'✓':'—'}</div>
                     </div>
                   ))}
                   <div style={{ padding:'16px 20px', borderTop:'1px solid var(--border)' }}>
@@ -1916,7 +2131,7 @@ function App() {
                       ['Original', countP(result.origGrammar.productions), '#55556a'],
                       result.cnfResult && ['CNF', countP(result.cnfResult.finalProductions), '#7c5cfc'],
                       result.gnfResult && ['GNF', countP(result.gnfResult.finalProductions), '#5cfce8'],
-                    ].filter(Boolean).map(([lbl, n, c]) => (
+                    ].filter(Boolean).map(([lbl,n,c])=>(
                       <div key={lbl} style={{ display:'flex', justifyContent:'space-between', fontSize:13, marginTop:6 }}>
                         <span style={{ color:'var(--text2)' }}>{lbl}</span>
                         <span style={{ fontFamily:'"JetBrains Mono",monospace', color:c }}>{n} rules</span>
@@ -1929,10 +2144,17 @@ function App() {
                   <VizSection
                     allSteps={allSteps}
                     origGrammar={result.origGrammar}
-                    startSymbol={result.cnfResult?.startSymbol || result.origGrammar.startSymbol}
+                    startSymbol={result.cnfResult?.startSymbol||result.origGrammar.startSymbol}
                   />
-                  {allSteps.map((step, i) => (
-                    <StepCard key={step.id} step={step} delay={i * 80} totalSteps={allSteps.length} />
+                  {allSteps.map((step,i) => (
+                    <StepCard
+                      key={step.id}
+                      step={step}
+                      delay={i*80}
+                      totalSteps={allSteps.length}
+                      prevProductions={i === 0 ? result.origGrammar.productions : allSteps[i-1].productions}
+                      origGrammar={result.origGrammar}
+                    />
                   ))}
                   <FinalPanel
                     cnfResult={result.cnfResult}
